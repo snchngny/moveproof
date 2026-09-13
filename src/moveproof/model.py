@@ -5,7 +5,15 @@ from typing import Any, Literal
 
 
 FingerprintMode = Literal["sampled", "full"]
-ChangeKind = Literal["unchanged", "moved", "copied", "added", "removed", "ambiguous"]
+ChangeKind = Literal[
+    "unchanged",
+    "modified",
+    "moved",
+    "copied",
+    "added",
+    "removed",
+    "ambiguous",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,12 +71,23 @@ class Snapshot:
 @dataclass(frozen=True, slots=True)
 class Change:
     kind: ChangeKind
-    fingerprint: str
-    old_path: str | None = None
-    new_path: str | None = None
+    old: FileRecord | None = None
+    new: FileRecord | None = None
+
+    @property
+    def old_path(self) -> str | None:
+        return self.old.path if self.old else None
+
+    @property
+    def new_path(self) -> str | None:
+        return self.new.path if self.new else None
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "kind": self.kind,
+            "old": asdict(self.old) if self.old else None,
+            "new": asdict(self.new) if self.new else None,
+        }
 
 
 @dataclass(frozen=True, slots=True)

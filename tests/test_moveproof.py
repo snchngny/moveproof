@@ -61,17 +61,20 @@ class SnapshotTests(unittest.TestCase):
             (root / "keep.txt").write_text("keep", encoding="utf-8")
             (root / "move.txt").write_text("move", encoding="utf-8")
             (root / "remove.txt").write_text("remove", encoding="utf-8")
+            (root / "modify.txt").write_text("before", encoding="utf-8")
             before = create_snapshot(root)
 
             (root / "move.txt").rename(root / "moved.txt")
             (root / "remove.txt").unlink()
             (root / "added.txt").write_text("added", encoding="utf-8")
             (root / "copy.txt").write_text("keep", encoding="utf-8")
+            (root / "modify.txt").write_text("after", encoding="utf-8")
             after = create_snapshot(root)
 
             kinds = [change.kind for change in compare_snapshots(before, after).changes]
             self.assertEqual(kinds.count("unchanged"), 1)
             self.assertEqual(kinds.count("moved"), 1)
+            self.assertEqual(kinds.count("modified"), 1)
             self.assertEqual(kinds.count("removed"), 1)
             self.assertEqual(kinds.count("added"), 1)
             self.assertEqual(kinds.count("copied"), 1)
@@ -119,6 +122,8 @@ class SnapshotTests(unittest.TestCase):
             self.assertEqual(main(["compare", str(before), str(after), "-o", str(output)]), 0)
             value = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(value["changes"][0]["kind"], "moved")
+            self.assertEqual(value["changes"][0]["old"]["path"], "file")
+            self.assertEqual(value["changes"][0]["new"]["path"], "renamed")
 
 
 if __name__ == "__main__":

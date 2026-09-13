@@ -18,37 +18,47 @@ def compare_snapshots(before: Snapshot, after: Snapshot) -> ChangeSet:
     if before.sample_bytes != after.sample_bytes:
         raise ValueError("snapshots use different sample sizes")
 
-    old_groups = _by_fingerprint(before.records)
-    new_groups = _by_fingerprint(after.records)
     changes: list[Change] = []
+    old_by_path = {record.path: record for record in before.records}
+    new_by_path = {record.path: record for record in after.records}
+    common_paths = old_by_path.keys() & new_by_path.keys()
+
+    for path in sorted(common_paths):
+        old_record = old_by_path[path]
+        new_record = new_by_path[path]
+        kind = "unchanged" if old_record.fingerprint == new_record.fingerprint else "modified"
+        changes.append(Change(kind, old_record, new_record))
+
+    unmatched_old_records = tuple(
+        record for record in before.records if record.path not in common_paths
+    )
+    unmatched_new_records = tuple(
+        record for record in after.records if record.path not in common_paths
+    )
+    old_groups = _by_fingerprint(unmatched_old_records)
+    new_groups = _by_fingerprint(unmatched_new_records)
+    all_old_groups = _by_fingerprint(before.records)
 
     for fingerprint in sorted(old_groups.keys() | new_groups.keys()):
         old_records = old_groups.get(fingerprint, [])
         new_records = new_groups.get(fingerprint, [])
-        old_by_path = {record.path: record for record in old_records}
-        new_by_path = {record.path: record for record in new_records}
 
-        common_paths = sorted(old_by_path.keys() & new_by_path.keys())
-        for path in common_paths:
-            changes.append(Change("unchanged", fingerprint, path, path))
-
-        unmatched_old = sorted(old_by_path.keys() - new_by_path.keys())
-        unmatched_new = sorted(new_by_path.keys() - old_by_path.keys())
-
-        if len(unmatched_old) == 1 and len(unmatched_new) == 1:
-            changes.append(Change("moved", fingerprint, unmatched_old[0], unmatched_new[0]))
-        elif not unmatched_old:
-            for path in unmatched_new:
-                kind = "copied" if old_records else "added"
-                source = old_records[0].path if old_records else None
-                changes.append(Change(kind, fingerprint, source, path))
-        elif not unmatched_new:
-            for path in unmatched_old:
-                changes.append(Change("removed", fingerprint, path, None))
+        if len(old_records) == 1 and len(new_records) == 1:
+            changes.append(Change("moved", old_records[0], new_records[0]))
+        elif not old_records:
+            existing_sources = all_old_groups.get(fingerprint, [])
+            for new_record in new_records:
+                if existing_sources:
+                    changes.append(Change("copied", existing_sources[0], new_record))
+                else:
+                    changes.append(Change("added", None, new_record))
+        elif not new_records:
+            for old_record in old_records:
+                changes.append(Change("removed", old_record, None))
         else:
-            for path in unmatched_old:
-                changes.append(Change("ambiguous", fingerprint, path, None))
-            for path in unmatched_new:
-                changes.append(Change("ambiguous", fingerprint, None, path))
+            for old_record in old_records:
+                changes.append(Change("ambiguous", old_record, None))
+            for new_record in new_records:
+                changes.append(Change("ambiguous", None, new_record))
 
     return ChangeSet(tuple(changes))

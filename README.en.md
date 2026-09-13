@@ -1,6 +1,6 @@
 # Moveproof
 
-Moveproof is a zero-dependency Python library for identifying large local files without reading them in full on every scan. It compares snapshots and reports renames, moves, copies, additions, and removals.
+Moveproof is a zero-dependency Python library for identifying large local files without reading them in full on every scan. It compares snapshots and reports modifications, renames, moves, copies, additions, and removals.
 
 ## Install
 
