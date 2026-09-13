@@ -12,11 +12,18 @@ def _by_fingerprint(records: tuple[FileRecord, ...]) -> dict[str, list[FileRecor
     return grouped
 
 
-def compare_snapshots(before: Snapshot, after: Snapshot) -> ChangeSet:
+def compare_snapshots(
+    before: Snapshot,
+    after: Snapshot,
+    *,
+    allow_incomplete: bool = False,
+) -> ChangeSet:
     if before.mode != after.mode:
         raise ValueError("snapshots use different fingerprint modes")
     if before.sample_bytes != after.sample_bytes:
         raise ValueError("snapshots use different sample sizes")
+    if not allow_incomplete and (before.issues or after.issues):
+        raise ValueError("cannot compare incomplete snapshots without allow_incomplete=True")
 
     changes: list[Change] = []
     old_by_path = {record.path: record for record in before.records}

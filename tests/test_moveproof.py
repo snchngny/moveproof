@@ -4,8 +4,16 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from moveproof import compare_snapshots, create_snapshot, fingerprint_file, load_snapshot, save_snapshot
+from moveproof import (
+    ScanIssue,
+    compare_snapshots,
+    create_snapshot,
+    fingerprint_file,
+    load_snapshot,
+    save_snapshot,
+)
 from moveproof.cli import main
 
 
@@ -83,12 +91,68 @@ class SnapshotTests(unittest.TestCase):
             save_snapshot(after, snapshot_path)
             self.assertEqual(load_snapshot(snapshot_path), after)
 
+    def test_failed_snapshot_replace_preserves_existing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file").write_text("value", encoding="utf-8")
+            snapshot = create_snapshot(root)
+            output = root / "snapshot.json"
+            output.write_text("existing", encoding="utf-8")
+
+            with patch("moveproof.snapshot.os.replace", side_effect=OSError("replace failed")):
+                with self.assertRaisesRegex(OSError, "replace failed"):
+                    save_snapshot(snapshot, output)
+
+            self.assertEqual(output.read_text(encoding="utf-8"), "existing")
+            self.assertEqual(list(root.glob(".snapshot.json.*.tmp")), [])
+
     def test_hidden_files_are_excluded_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / ".hidden").write_text("hidden", encoding="utf-8")
             (root / "visible").write_text("visible", encoding="utf-8")
             self.assertEqual([item.path for item in create_snapshot(root).records], ["visible"])
+
+    def test_scan_can_record_a_file_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            good = root / "good"
+            bad = root / "bad"
+            good.write_text("good", encoding="utf-8")
+            bad.write_text("bad", encoding="utf-8")
+            original = fingerprint_file
+
+            def fingerprint_or_fail(path: Path, **options: object) -> tuple[str, int]:
+                if path.name == "bad":
+                    raise PermissionError("denied for test")
+                value = original(path, **options)
+                return value, path.stat().st_size
+
+            with patch("moveproof.snapshot._fingerprint_with_size", side_effect=fingerprint_or_fail):
+                snapshot = create_snapshot(root, on_error="record")
+
+            self.assertEqual([record.path for record in snapshot.records], ["good"])
+            self.assertEqual(snapshot.issues[0].path, "bad")
+            self.assertEqual(snapshot.issues[0].error_type, "PermissionError")
+
+    def test_incomplete_snapshots_are_rejected_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file").write_text("value", encoding="utf-8")
+            complete = create_snapshot(root)
+            incomplete = type(complete)(
+                root=complete.root,
+                mode=complete.mode,
+                records=complete.records,
+                issues=(ScanIssue("missing", "PermissionError", "denied"),),
+                sample_bytes=complete.sample_bytes,
+            )
+            with self.assertRaisesRegex(ValueError, "incomplete snapshots"):
+                compare_snapshots(complete, incomplete)
+            self.assertEqual(
+                compare_snapshots(complete, incomplete, allow_incomplete=True).changes[0].kind,
+                "unchanged",
+            )
 
     def test_different_modes_cannot_be_compared(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

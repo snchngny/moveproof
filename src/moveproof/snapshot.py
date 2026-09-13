@@ -1,10 +1,51 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from pathlib import Path
+from typing import Callable, Iterator
 
 from .fingerprint import DEFAULT_SAMPLE_BYTES, _fingerprint_with_size
-from .model import FileRecord, Snapshot
+from .model import ErrorPolicy, FileRecord, ScanIssue, Snapshot
+
+
+def _relative_display(root: Path, path: Path) -> str:
+    try:
+        value = path.relative_to(root).as_posix()
+        return value or "."
+    except ValueError:
+        return str(path)
+
+
+def _walk_files(
+    root: Path,
+    *,
+    include_hidden: bool,
+    handle_error: Callable[[Path, OSError], None],
+) -> Iterator[Path]:
+    def on_error(error: OSError) -> None:
+        handle_error(Path(error.filename) if error.filename else root, error)
+
+    for directory, directory_names, file_names in os.walk(
+        root,
+        topdown=True,
+        onerror=on_error,
+        followlinks=False,
+    ):
+        directory_path = Path(directory)
+        directory_names[:] = sorted(
+            name
+            for name in directory_names
+            if (include_hidden or not name.startswith("."))
+            and not (directory_path / name).is_symlink()
+        )
+        for name in sorted(file_names):
+            if not include_hidden and name.startswith("."):
+                continue
+            path = directory_path / name
+            if not path.is_symlink():
+                yield path
 
 
 def create_snapshot(
@@ -13,23 +54,44 @@ def create_snapshot(
     full: bool = False,
     include_hidden: bool = False,
     sample_bytes: int = DEFAULT_SAMPLE_BYTES,
+    on_error: ErrorPolicy = "raise",
 ) -> Snapshot:
     root_path = Path(root).resolve()
     if not root_path.is_dir():
         raise NotADirectoryError(root_path)
 
+    if on_error not in {"raise", "record"}:
+        raise ValueError(f"unsupported error policy: {on_error}")
+
     records: list[FileRecord] = []
-    for path in sorted(root_path.rglob("*")):
-        relative = path.relative_to(root_path)
-        if not include_hidden and any(part.startswith(".") for part in relative.parts):
-            continue
-        if not path.is_file() or path.is_symlink():
-            continue
-        fingerprint, size = _fingerprint_with_size(
-            path,
-            full=full,
-            sample_bytes=sample_bytes,
+    issues: list[ScanIssue] = []
+
+    def handle_error(path: Path, error: OSError) -> None:
+        if on_error == "raise":
+            raise error
+        issues.append(
+            ScanIssue(
+                path=_relative_display(root_path, path),
+                error_type=type(error).__name__,
+                message=error.strerror or str(error),
+            )
         )
+
+    for path in _walk_files(
+        root_path,
+        include_hidden=include_hidden,
+        handle_error=handle_error,
+    ):
+        relative = path.relative_to(root_path)
+        try:
+            fingerprint, size = _fingerprint_with_size(
+                path,
+                full=full,
+                sample_bytes=sample_bytes,
+            )
+        except OSError as error:
+            handle_error(path, error)
+            continue
         records.append(
             FileRecord(
                 path=relative.as_posix(),
@@ -41,17 +103,30 @@ def create_snapshot(
     return Snapshot(
         root=str(root_path),
         mode="full" if full else "sampled",
-        records=tuple(records),
+        records=tuple(sorted(records, key=lambda record: record.path)),
+        issues=tuple(sorted(issues, key=lambda issue: issue.path)),
         sample_bytes=None if full else sample_bytes,
     )
 
 
 def save_snapshot(snapshot: Snapshot, path: str | Path) -> None:
     output = Path(path)
-    output.write_text(
-        json.dumps(snapshot.to_dict(), ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    body = json.dumps(snapshot.to_dict(), ensure_ascii=False, indent=2) + "\n"
+    file_descriptor, temporary_name = tempfile.mkstemp(
+        dir=output.parent,
+        prefix=f".{output.name}.",
+        suffix=".tmp",
     )
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8", newline="\n") as target:
+            target.write(body)
+            target.flush()
+            os.fsync(target.fileno())
+        os.replace(temporary_path, output)
+    except BaseException:
+        temporary_path.unlink(missing_ok=True)
+        raise
 
 
 def load_snapshot(path: str | Path) -> Snapshot:

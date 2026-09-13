@@ -14,6 +14,7 @@ ChangeKind = Literal[
     "removed",
     "ambiguous",
 ]
+ErrorPolicy = Literal["raise", "record"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,10 +33,26 @@ class FileRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class ScanIssue:
+    path: str
+    error_type: str
+    message: str
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> ScanIssue:
+        return cls(
+            path=str(value["path"]),
+            error_type=str(value["error_type"]),
+            message=str(value["message"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class Snapshot:
     root: str
     mode: FingerprintMode
     records: tuple[FileRecord, ...]
+    issues: tuple[ScanIssue, ...] = ()
     sample_bytes: int | None = None
     schema_version: int = 1
 
@@ -46,6 +63,7 @@ class Snapshot:
             "mode": self.mode,
             "sample_bytes": self.sample_bytes,
             "records": [asdict(record) for record in self.records],
+            "issues": [asdict(issue) for issue in self.issues],
         }
 
     @classmethod
@@ -64,6 +82,7 @@ class Snapshot:
             root=str(value["root"]),
             mode=mode,  # type: ignore[arg-type]
             records=tuple(FileRecord.from_dict(item) for item in value["records"]),
+            issues=tuple(ScanIssue.from_dict(item) for item in value.get("issues", [])),
             sample_bytes=sample_bytes,
         )
 

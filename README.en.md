@@ -30,6 +30,10 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
+By default, one unreadable file stops snapshot creation. Use `--record-errors` to preserve diagnostics from a long scan: the CLI writes an incomplete snapshot with per-path issues and exits with code 1. Comparing incomplete snapshots is rejected by default to avoid false removal reports; use `--allow-incomplete` only when you understand the missing coverage.
+
+Snapshot JSON is written to a temporary file in the same directory and then replaced, so a failed write does not leave an existing snapshot half-written.
+
 By default, files up to 64 KiB are read in full. Larger files are sampled at the beginning, middle, and end, with the file size included in the digest. A file that changes while being read is rejected.
 
 The snapshot records its sampling width. Comparing snapshots created with different modes or widths fails explicitly instead of producing misleading changes.

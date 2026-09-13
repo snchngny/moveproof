@@ -18,12 +18,18 @@ def _parser() -> argparse.ArgumentParser:
     snapshot.add_argument("--output", "-o", type=Path, required=True)
     snapshot.add_argument("--full", action="store_true", help="hash every byte")
     snapshot.add_argument("--include-hidden", action="store_true")
+    snapshot.add_argument(
+        "--record-errors",
+        action="store_true",
+        help="write an incomplete snapshot with per-path issues instead of stopping",
+    )
 
     compare = commands.add_parser("compare", help="compare two snapshots")
     compare.add_argument("before", type=Path)
     compare.add_argument("after", type=Path)
     compare.add_argument("--output", "-o", type=Path)
     compare.add_argument("--include-unchanged", action="store_true")
+    compare.add_argument("--allow-incomplete", action="store_true")
     return parser
 
 
@@ -34,11 +40,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.root,
             full=args.full,
             include_hidden=args.include_hidden,
+            on_error="record" if args.record_errors else "raise",
         )
         save_snapshot(result, args.output)
-        return 0
+        return 1 if result.issues else 0
 
-    result = compare_snapshots(load_snapshot(args.before), load_snapshot(args.after))
+    result = compare_snapshots(
+        load_snapshot(args.before),
+        load_snapshot(args.after),
+        allow_incomplete=args.allow_incomplete,
+    )
     changes = result.changes
     if not args.include_unchanged:
         changes = tuple(change for change in changes if change.kind != "unchanged")
@@ -56,4 +67,3 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
