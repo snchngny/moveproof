@@ -28,6 +28,7 @@ class Snapshot:
     root: str
     mode: FingerprintMode
     records: tuple[FileRecord, ...]
+    sample_bytes: int | None = None
     schema_version: int = 1
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +36,7 @@ class Snapshot:
             "schema_version": self.schema_version,
             "root": self.root,
             "mode": self.mode,
+            "sample_bytes": self.sample_bytes,
             "records": [asdict(record) for record in self.records],
         }
 
@@ -46,10 +48,15 @@ class Snapshot:
         mode = str(value["mode"])
         if mode not in {"sampled", "full"}:
             raise ValueError(f"unsupported fingerprint mode: {mode}")
+        raw_sample_bytes = value.get("sample_bytes")
+        sample_bytes = None if raw_sample_bytes is None else int(raw_sample_bytes)
+        if mode == "sampled" and (sample_bytes is None or sample_bytes < 1):
+            raise ValueError("sampled snapshots require a positive sample_bytes value")
         return cls(
             root=str(value["root"]),
             mode=mode,  # type: ignore[arg-type]
             records=tuple(FileRecord.from_dict(item) for item in value["records"]),
+            sample_bytes=sample_bytes,
         )
 
 
@@ -70,4 +77,3 @@ class ChangeSet:
 
     def to_dict(self) -> dict[str, Any]:
         return {"changes": [change.to_dict() for change in self.changes]}
-

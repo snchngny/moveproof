@@ -34,6 +34,12 @@ class FingerprintTests(unittest.TestCase):
             path.write_bytes(b"value")
             self.assertNotEqual(fingerprint_file(path), fingerprint_file(path, full=True))
 
+    def test_sample_size_is_part_of_the_fingerprint_scheme(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "value.bin"
+            path.write_bytes(b"value")
+            self.assertTrue(fingerprint_file(path, sample_bytes=7).startswith("moveproof-sampled-v1-7:"))
+
     def test_symlinks_are_not_fingerprinted(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -87,6 +93,16 @@ class SnapshotTests(unittest.TestCase):
             (root / "file").write_text("value", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "different fingerprint modes"):
                 compare_snapshots(create_snapshot(root), create_snapshot(root, full=True))
+
+    def test_different_sample_sizes_cannot_be_compared(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file").write_text("value", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "different sample sizes"):
+                compare_snapshots(
+                    create_snapshot(root, sample_bytes=8),
+                    create_snapshot(root, sample_bytes=16),
+                )
 
     def test_cli_writes_machine_readable_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -15,6 +15,8 @@ def _by_fingerprint(records: tuple[FileRecord, ...]) -> dict[str, list[FileRecor
 def compare_snapshots(before: Snapshot, after: Snapshot) -> ChangeSet:
     if before.mode != after.mode:
         raise ValueError("snapshots use different fingerprint modes")
+    if before.sample_bytes != after.sample_bytes:
+        raise ValueError("snapshots use different sample sizes")
 
     old_groups = _by_fingerprint(before.records)
     new_groups = _by_fingerprint(after.records)
@@ -50,4 +52,3 @@ def compare_snapshots(before: Snapshot, after: Snapshot) -> ChangeSet:
                 changes.append(Change("ambiguous", fingerprint, None, path))
 
     return ChangeSet(tuple(changes))
-

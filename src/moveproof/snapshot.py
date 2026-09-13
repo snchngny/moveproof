@@ -42,6 +42,7 @@ def create_snapshot(
         root=str(root_path),
         mode="full" if full else "sampled",
         records=tuple(records),
+        sample_bytes=None if full else sample_bytes,
     )
 
 

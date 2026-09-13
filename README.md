@@ -41,6 +41,8 @@ moveproof compare before.json after.json
 
 `snapshot`は既定で64 KiB以下のファイルを全読込し、それより大きいファイルは先頭・中央・末尾を読みます。ファイルサイズもdigestへ含めます。読取中にファイルが変化した場合は記録せず、エラーとして扱います。
 
+snapshotにはsampling幅も保存され、異なる方式・幅のsnapshotを誤って比較すると明示的に失敗します。
+
 部分フィンガープリントは暗号学的な完全同一性の証明ではありません。意図的な衝突が問題になる用途や、内容の完全一致を保証する用途では`--full`を使ってください。
 
 ## 開発
@@ -48,9 +50,9 @@ moveproof compare before.json after.json
 ```bash
 python -m unittest discover -s tests -v
 python -m build
+python benchmarks/benchmark_fingerprint.py --size-mib 256
 ```
 
 ## License
 
 MIT
-

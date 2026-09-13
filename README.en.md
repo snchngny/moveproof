@@ -32,9 +32,16 @@ moveproof compare before.json after.json
 
 By default, files up to 64 KiB are read in full. Larger files are sampled at the beginning, middle, and end, with the file size included in the digest. A file that changes while being read is rejected.
 
+The snapshot records its sampling width. Comparing snapshots created with different modes or widths fails explicitly instead of producing misleading changes.
+
 A sampled fingerprint is not proof of complete byte identity. Use `--full` when adversarial collisions or exact content identity matter.
+
+## Benchmark
+
+```bash
+python benchmarks/benchmark_fingerprint.py --size-mib 256
+```
 
 ## License
 
 MIT
-

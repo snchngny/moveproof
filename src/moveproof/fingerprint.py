@@ -54,7 +54,7 @@ def _fingerprint_with_size(
         raise OSError(f"not a regular file: {file_path}")
 
     digest = hashlib.blake2b(digest_size=32)
-    scheme = FULL_SCHEME if full else SAMPLED_SCHEME
+    scheme = FULL_SCHEME if full else f"{SAMPLED_SCHEME}-{sample_bytes}"
     digest.update(scheme.encode("ascii"))
 
     with file_path.open("rb") as source:
