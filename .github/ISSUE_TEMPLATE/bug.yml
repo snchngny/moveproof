@@ -1,0 +1,34 @@
+name: Bug report
+description: 再現可能な不具合を報告する
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Security上の問題は公開issueへ書かず、Security policyを確認してください。
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 発生した動作
+      description: 期待した動作と実際の動作を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 最小の再現手順
+      description: 秘密情報や実データを除いたfixtureまたはコマンドを記載してください。
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Moveproof version
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OSとPython version
+    validations:
+      required: true

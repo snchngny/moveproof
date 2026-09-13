@@ -1,0 +1,19 @@
+name: Feature request
+description: 実際の利用例に基づく改善を提案する
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: 解決したい利用例
+      description: 現在の回避策、file数・size、必要な結果を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 最小の提案
+      description: API案がある場合は記載してください。
+    validations:
+      required: false

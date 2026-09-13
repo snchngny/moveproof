@@ -1,0 +1,19 @@
+# 変更履歴
+
+このprojectは[Semantic Versioning](https://semver.org/)に従う。
+
+## 0.1.0 - 未公開
+
+### 追加
+
+- version付きの部分・全byte fingerprint
+- directory snapshotのJSON保存と読込
+- 変更、移動、copy、追加、削除、曖昧な重複の分類
+- Python APIとCLI
+- Windows、macOS、Linux向けCI
+
+### 安全性
+
+- fingerprint読取中のfile変更を検出
+- 異なるfingerprint方式・sampling幅のsnapshot比較を拒否
+- symlinkを既定で追跡しない

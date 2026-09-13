@@ -42,6 +42,10 @@ A sampled fingerprint is not proof of complete byte identity. Use `--full` when 
 python benchmarks/benchmark_fingerprint.py --size-mib 256
 ```
 
+The benchmark repeatedly reads the same file and is affected by the OS cache, storage, and sparse-file support. Include the environment and run parameters when publishing results.
+
+See the [contribution guide](CONTRIBUTING.md) before proposing changes and the [security policy](SECURITY.md) before reporting a vulnerability.
+
 ## License
 
 MIT

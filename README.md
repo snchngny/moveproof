@@ -53,6 +53,12 @@ python -m build
 python benchmarks/benchmark_fingerprint.py --size-mib 256
 ```
 
+benchmarkは同じfileを繰り返し読むため、OS cache、storage、sparse file対応の影響を受けます。結果を掲載するときは環境と実行条件を併記してください。
+
+変更提案は[Contribution guide](CONTRIBUTING.md)、脆弱性報告は[Security policy](SECURITY.md)を確認してください。
+
+保守者向けの公開手順は[Release手順](docs/release.md)にあります。
+
 ## License
 
 MIT
