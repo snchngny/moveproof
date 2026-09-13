@@ -1,0 +1,56 @@
+# Moveproof
+
+大きなローカルファイルを毎回すべて読まずに識別し、改名・移動・コピーを検出するゼロ依存のPythonライブラリです。
+
+[English README](README.en.md)
+
+## 使いどころ
+
+- 音源、動画、写真などのローカル索引で、パスが変わってもタグや履歴を引き継ぐ
+- バックアップやメディア管理ツールで、追加・削除・移動を区別する
+- 部分フィンガープリントの形式をversion付きで保存し、将来の方式変更を安全に扱う
+
+## インストール
+
+```bash
+pip install moveproof
+```
+
+## Python API
+
+```python
+from pathlib import Path
+from moveproof import compare_snapshots, create_snapshot
+
+before = create_snapshot(Path("media"))
+# ファイルを移動・追加する
+after = create_snapshot(Path("media"))
+
+changes = compare_snapshots(before, after)
+for change in changes.changes:
+    print(change.kind, change.old_path, change.new_path)
+```
+
+## CLI
+
+```bash
+moveproof snapshot media --output before.json
+moveproof snapshot media --output after.json
+moveproof compare before.json after.json
+```
+
+`snapshot`は既定で64 KiB以下のファイルを全読込し、それより大きいファイルは先頭・中央・末尾を読みます。ファイルサイズもdigestへ含めます。読取中にファイルが変化した場合は記録せず、エラーとして扱います。
+
+部分フィンガープリントは暗号学的な完全同一性の証明ではありません。意図的な衝突が問題になる用途や、内容の完全一致を保証する用途では`--full`を使ってください。
+
+## 開発
+
+```bash
+python -m unittest discover -s tests -v
+python -m build
+```
+
+## License
+
+MIT
+

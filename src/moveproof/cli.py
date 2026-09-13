@@ -1,0 +1,59 @@
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Sequence
+
+from .compare import compare_snapshots
+from .snapshot import create_snapshot, load_snapshot, save_snapshot
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="moveproof")
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    snapshot = commands.add_parser("snapshot", help="create a directory snapshot")
+    snapshot.add_argument("root", type=Path)
+    snapshot.add_argument("--output", "-o", type=Path, required=True)
+    snapshot.add_argument("--full", action="store_true", help="hash every byte")
+    snapshot.add_argument("--include-hidden", action="store_true")
+
+    compare = commands.add_parser("compare", help="compare two snapshots")
+    compare.add_argument("before", type=Path)
+    compare.add_argument("after", type=Path)
+    compare.add_argument("--output", "-o", type=Path)
+    compare.add_argument("--include-unchanged", action="store_true")
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.command == "snapshot":
+        result = create_snapshot(
+            args.root,
+            full=args.full,
+            include_hidden=args.include_hidden,
+        )
+        save_snapshot(result, args.output)
+        return 0
+
+    result = compare_snapshots(load_snapshot(args.before), load_snapshot(args.after))
+    changes = result.changes
+    if not args.include_unchanged:
+        changes = tuple(change for change in changes if change.kind != "unchanged")
+    body = json.dumps(
+        {"changes": [change.to_dict() for change in changes]},
+        ensure_ascii=False,
+        indent=2,
+    ) + "\n"
+    if args.output:
+        args.output.write_text(body, encoding="utf-8")
+    else:
+        print(body, end="")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+

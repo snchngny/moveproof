@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "moveproof"
+version = "0.1.0"
+description = "Fast, versioned file fingerprints and rename detection for local indexes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "senooy-dot" }]
+keywords = ["filesystem", "fingerprint", "rename-detection", "file-index"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: System :: Filesystems",
+]
+
+[project.scripts]
+moveproof = "moveproof.cli:main"
+
+[project.urls]
+Repository = "https://github.com/senooy-dot/moveproof"
+Issues = "https://github.com/senooy-dot/moveproof/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/moveproof"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
