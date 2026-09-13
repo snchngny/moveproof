@@ -54,6 +54,8 @@ class Snapshot:
     records: tuple[FileRecord, ...]
     issues: tuple[ScanIssue, ...] = ()
     sample_bytes: int | None = None
+    include_patterns: tuple[str, ...] = ()
+    exclude_patterns: tuple[str, ...] = ()
     schema_version: int = 1
 
     def to_dict(self) -> dict[str, Any]:
@@ -62,6 +64,8 @@ class Snapshot:
             "root": self.root,
             "mode": self.mode,
             "sample_bytes": self.sample_bytes,
+            "include_patterns": list(self.include_patterns),
+            "exclude_patterns": list(self.exclude_patterns),
             "records": [asdict(record) for record in self.records],
             "issues": [asdict(issue) for issue in self.issues],
         }
@@ -84,6 +88,8 @@ class Snapshot:
             records=tuple(FileRecord.from_dict(item) for item in value["records"]),
             issues=tuple(ScanIssue.from_dict(item) for item in value.get("issues", [])),
             sample_bytes=sample_bytes,
+            include_patterns=tuple(str(item) for item in value.get("include_patterns", [])),
+            exclude_patterns=tuple(str(item) for item in value.get("exclude_patterns", [])),
         )
 
 

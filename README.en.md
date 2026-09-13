@@ -30,6 +30,12 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
+Limit a scan with relative-path globs. Excludes take precedence over includes, and the filter profile is stored in the snapshot. Snapshots with different filters cannot be compared accidentally.
+
+```bash
+moveproof snapshot media --include "*.wav" --include "*.aiff" --exclude "archive/*" -o audio.json
+```
+
 By default, one unreadable file stops snapshot creation. Use `--record-errors` to preserve diagnostics from a long scan: the CLI writes an incomplete snapshot with per-path issues and exits with code 1. Comparing incomplete snapshots is rejected by default to avoid false removal reports; use `--allow-incomplete` only when you understand the missing coverage.
 
 Snapshot JSON is written to a temporary file in the same directory and then replaced, so a failed write does not leave an existing snapshot half-written.

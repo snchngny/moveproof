@@ -10,6 +10,7 @@
 - directory snapshotのJSON保存と読込
 - 読取失敗をsnapshotへ残す任意のerror policy
 - 既存fileを途中状態へ壊さないatomic snapshot保存
+- include/exclude globと比較時のfilter互換性検査
 - 変更、移動、copy、追加、削除、曖昧な重複の分類
 - Python APIとCLI
 - Windows、macOS、Linux向けCI

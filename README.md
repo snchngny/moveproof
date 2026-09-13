@@ -39,6 +39,12 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
+対象をrelative pathのglobで絞れます。excludeはincludeより優先され、指定条件はsnapshotへ保存されます。異なる条件のsnapshot比較は誤判定を避けるため拒否されます。
+
+```bash
+moveproof snapshot media --include "*.wav" --include "*.aiff" --exclude "archive/*" -o audio.json
+```
+
 通常は一件でも読取に失敗するとsnapshot作成を中止します。長時間scanの診断結果を残したい場合は`--record-errors`を使います。この場合はissue付きsnapshotを書き、CLIは終了code 1を返します。不完全なsnapshot同士の比較は誤った削除判定を避けるため既定で拒否され、内容を理解したうえで`--allow-incomplete`を指定できます。
 
 snapshot JSONは同じdirectoryの一時fileへ書いてから置換するため、書込失敗で既存snapshotを途中状態へ壊しません。

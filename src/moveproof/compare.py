@@ -22,6 +22,11 @@ def compare_snapshots(
         raise ValueError("snapshots use different fingerprint modes")
     if before.sample_bytes != after.sample_bytes:
         raise ValueError("snapshots use different sample sizes")
+    if (
+        before.include_patterns != after.include_patterns
+        or before.exclude_patterns != after.exclude_patterns
+    ):
+        raise ValueError("snapshots use different path filters")
     if not allow_incomplete and (before.issues or after.issues):
         raise ValueError("cannot compare incomplete snapshots without allow_incomplete=True")
 

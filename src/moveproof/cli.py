@@ -19,6 +19,20 @@ def _parser() -> argparse.ArgumentParser:
     snapshot.add_argument("--full", action="store_true", help="hash every byte")
     snapshot.add_argument("--include-hidden", action="store_true")
     snapshot.add_argument(
+        "--include",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="include matching relative paths; repeat for multiple patterns",
+    )
+    snapshot.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="exclude matching relative paths; repeat for multiple patterns",
+    )
+    snapshot.add_argument(
         "--record-errors",
         action="store_true",
         help="write an incomplete snapshot with per-path issues instead of stopping",
@@ -41,6 +55,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             full=args.full,
             include_hidden=args.include_hidden,
             on_error="record" if args.record_errors else "raise",
+            include_patterns=args.include,
+            exclude_patterns=args.exclude,
         )
         save_snapshot(result, args.output)
         return 1 if result.issues else 0

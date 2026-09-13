@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Sequence
 
 from .fingerprint import DEFAULT_SAMPLE_BYTES, _fingerprint_with_size
 from .model import ErrorPolicy, FileRecord, ScanIssue, Snapshot
@@ -55,6 +56,8 @@ def create_snapshot(
     include_hidden: bool = False,
     sample_bytes: int = DEFAULT_SAMPLE_BYTES,
     on_error: ErrorPolicy = "raise",
+    include_patterns: Sequence[str] = (),
+    exclude_patterns: Sequence[str] = (),
 ) -> Snapshot:
     root_path = Path(root).resolve()
     if not root_path.is_dir():
@@ -62,6 +65,10 @@ def create_snapshot(
 
     if on_error not in {"raise", "record"}:
         raise ValueError(f"unsupported error policy: {on_error}")
+    includes = tuple(sorted(set(include_patterns)))
+    excludes = tuple(sorted(set(exclude_patterns)))
+    if any(not pattern for pattern in includes + excludes):
+        raise ValueError("include and exclude patterns cannot be empty")
 
     records: list[FileRecord] = []
     issues: list[ScanIssue] = []
@@ -83,6 +90,13 @@ def create_snapshot(
         handle_error=handle_error,
     ):
         relative = path.relative_to(root_path)
+        relative_name = relative.as_posix()
+        if includes and not any(
+            fnmatch.fnmatchcase(relative_name, pattern) for pattern in includes
+        ):
+            continue
+        if any(fnmatch.fnmatchcase(relative_name, pattern) for pattern in excludes):
+            continue
         try:
             fingerprint, size = _fingerprint_with_size(
                 path,
@@ -94,7 +108,7 @@ def create_snapshot(
             continue
         records.append(
             FileRecord(
-                path=relative.as_posix(),
+                path=relative_name,
                 size=size,
                 fingerprint=fingerprint,
             )
@@ -106,6 +120,8 @@ def create_snapshot(
         records=tuple(sorted(records, key=lambda record: record.path)),
         issues=tuple(sorted(issues, key=lambda issue: issue.path)),
         sample_bytes=None if full else sample_bytes,
+        include_patterns=includes,
+        exclude_patterns=excludes,
     )
 
 

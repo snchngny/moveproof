@@ -113,6 +113,31 @@ class SnapshotTests(unittest.TestCase):
             (root / "visible").write_text("visible", encoding="utf-8")
             self.assertEqual([item.path for item in create_snapshot(root).records], ["visible"])
 
+    def test_include_and_exclude_patterns_are_applied_and_saved(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "keep.wav").write_text("keep", encoding="utf-8")
+            (root / "skip.wav").write_text("skip", encoding="utf-8")
+            (root / "note.txt").write_text("note", encoding="utf-8")
+            snapshot = create_snapshot(
+                root,
+                include_patterns=("*.wav",),
+                exclude_patterns=("skip.*",),
+            )
+            self.assertEqual([record.path for record in snapshot.records], ["keep.wav"])
+            self.assertEqual(snapshot.include_patterns, ("*.wav",))
+            self.assertEqual(snapshot.exclude_patterns, ("skip.*",))
+
+    def test_different_path_filters_cannot_be_compared(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file").write_text("value", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "different path filters"):
+                compare_snapshots(
+                    create_snapshot(root),
+                    create_snapshot(root, include_patterns=("*.wav",)),
+                )
+
     def test_scan_can_record_a_file_error(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
