@@ -9,7 +9,7 @@ PyPI API tokenは保存せず、GitHub ActionsとPyPI Trusted Publishingを使�
 3. GitHub Environment `pypi`を作り、manual approvalを必須化
 4. PyPIのpending publisherへ次を登録
    - PyPI project: `moveproof`
-   - Owner: `senooy-dot`
+   - Owner: `snchngny`
    - Repository: `moveproof`
    - Workflow: `release.yml`
    - Environment: `pypi`

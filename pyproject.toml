@@ -9,7 +9,7 @@ description = "Fast, versioned file fingerprints and rename detection for local 
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{ name = "senooy-dot" }]
+authors = [{ name = "snchngny" }]
 keywords = ["filesystem", "fingerprint", "rename-detection", "file-index"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -23,12 +23,11 @@ classifiers = [
 moveproof = "moveproof.cli:main"
 
 [project.urls]
-Repository = "https://github.com/senooy-dot/moveproof"
-Issues = "https://github.com/senooy-dot/moveproof/issues"
+Repository = "https://github.com/snchngny/moveproof"
+Issues = "https://github.com/snchngny/moveproof/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/moveproof"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
