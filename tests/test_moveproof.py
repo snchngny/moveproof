@@ -9,6 +9,7 @@ from unittest.mock import patch
 from moveproof import (
     ScanIssue,
     compare_snapshots,
+    create_reconciliation_plan,
     create_snapshot,
     fingerprint_file,
     load_snapshot,
@@ -213,6 +214,48 @@ class SnapshotTests(unittest.TestCase):
             self.assertEqual(value["changes"][0]["kind"], "moved")
             self.assertEqual(value["changes"][0]["old"]["path"], "file")
             self.assertEqual(value["changes"][0]["new"]["path"], "renamed")
+
+    def test_reconciliation_plan_contains_only_safe_moves(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "old.jpg").write_text("photo", encoding="utf-8")
+            (root / "removed.jpg").write_text("removed", encoding="utf-8")
+            before = create_snapshot(root)
+            (root / "old.jpg").rename(root / "new.jpg")
+            (root / "removed.jpg").unlink()
+            (root / "added.jpg").write_text("added", encoding="utf-8")
+            plan = create_reconciliation_plan(compare_snapshots(before, create_snapshot(root)))
+
+            self.assertTrue(plan.safe)
+            self.assertEqual(len(plan.moves), 1)
+            self.assertEqual(plan.moves[0].old_path, "old.jpg")
+            self.assertEqual(plan.moves[0].new_path, "new.jpg")
+
+    def test_reconcile_cli_reports_ambiguous_matches_as_conflicts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            media = root / "media"
+            media.mkdir()
+            for name in ("old-a.jpg", "old-b.jpg"):
+                (media / name).write_text("same", encoding="utf-8")
+            before = root / "before.json"
+            after = root / "after.json"
+            output = root / "plan.json"
+            self.assertEqual(main(["snapshot", str(media), "-o", str(before)]), 0)
+            for path in media.iterdir():
+                path.unlink()
+            for name in ("new-a.jpg", "new-b.jpg"):
+                (media / name).write_text("same", encoding="utf-8")
+            self.assertEqual(main(["snapshot", str(media), "-o", str(after)]), 0)
+
+            self.assertEqual(
+                main(["reconcile", str(before), str(after), "-o", str(output)]),
+                1,
+            )
+            value = json.loads(output.read_text(encoding="utf-8"))
+            self.assertFalse(value["safe"])
+            self.assertEqual(value["conflicts"][0]["old_paths"], ["old-a.jpg", "old-b.jpg"])
+            self.assertEqual(value["conflicts"][0]["new_paths"], ["new-a.jpg", "new-b.jpg"])
 
 
 if __name__ == "__main__":

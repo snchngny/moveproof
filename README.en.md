@@ -30,6 +30,12 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
+Before updating paths in a database or media index, create a dry-run plan containing only move candidates. Ambiguous identical-content matches produce `safe: false` and exit code 1 so automation can stop. This command does not modify files or databases.
+
+```bash
+moveproof reconcile before.json after.json --output plan.json
+```
+
 Limit a scan with relative-path globs. Excludes take precedence over includes, and the filter profile is stored in the snapshot. Snapshots with different filters cannot be compared accidentally.
 
 ```bash

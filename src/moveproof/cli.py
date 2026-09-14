@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Sequence
 
 from .compare import compare_snapshots
+from .reconcile import create_reconciliation_plan
 from .snapshot import create_snapshot, load_snapshot, save_snapshot
 
 
@@ -44,6 +45,15 @@ def _parser() -> argparse.ArgumentParser:
     compare.add_argument("--output", "-o", type=Path)
     compare.add_argument("--include-unchanged", action="store_true")
     compare.add_argument("--allow-incomplete", action="store_true")
+
+    reconcile = commands.add_parser(
+        "reconcile",
+        help="create a dry-run path reconciliation plan",
+    )
+    reconcile.add_argument("before", type=Path)
+    reconcile.add_argument("after", type=Path)
+    reconcile.add_argument("--output", "-o", type=Path)
+    reconcile.add_argument("--allow-incomplete", action="store_true")
     return parser
 
 
@@ -66,6 +76,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         load_snapshot(args.after),
         allow_incomplete=args.allow_incomplete,
     )
+    if args.command == "reconcile":
+        plan = create_reconciliation_plan(result)
+        body = json.dumps(plan.to_dict(), ensure_ascii=False, indent=2) + "\n"
+        if args.output:
+            args.output.write_text(body, encoding="utf-8")
+        else:
+            print(body, end="")
+        return 0 if plan.safe else 1
+
     changes = result.changes
     if not args.include_unchanged:
         changes = tuple(change for change in changes if change.kind != "unchanged")

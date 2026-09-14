@@ -13,6 +13,7 @@
 - include/exclude globと比較時のfilter互換性検査
 - 変更、移動、copy、追加、削除、曖昧な重複の分類
 - Python APIとCLI
+- path更新前に安全な移動候補と曖昧な競合を分離するreconciliation plan API・CLI
 - Windows、macOS、Linux向けCI
 
 ### 安全性

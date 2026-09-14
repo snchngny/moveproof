@@ -39,6 +39,12 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
+DBやmedia indexのpathを安全に引き継ぐ前に、移動候補だけのdry-run planを作れます。曖昧な同一内容候補がある場合は`safe: false`を出力し、終了code 1で自動適用を止めます。このcommand自体はfileやDBを変更しません。
+
+```bash
+moveproof reconcile before.json after.json --output plan.json
+```
+
 対象をrelative pathのglobで絞れます。excludeはincludeより優先され、指定条件はsnapshotへ保存されます。異なる条件のsnapshot比較は誤判定を避けるため拒否されます。
 
 ```bash
