@@ -54,6 +54,11 @@ def _parser() -> argparse.ArgumentParser:
     reconcile.add_argument("after", type=Path)
     reconcile.add_argument("--output", "-o", type=Path)
     reconcile.add_argument("--allow-incomplete", action="store_true")
+    reconcile.add_argument(
+        "--allow-sampled",
+        action="store_true",
+        help="emit an advisory plan that cannot be applied automatically",
+    )
     return parser
 
 
@@ -71,19 +76,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         save_snapshot(result, args.output)
         return 1 if result.issues else 0
 
-    result = compare_snapshots(
-        load_snapshot(args.before),
-        load_snapshot(args.after),
-        allow_incomplete=args.allow_incomplete,
-    )
     if args.command == "reconcile":
-        plan = create_reconciliation_plan(result)
+        plan = create_reconciliation_plan(
+            load_snapshot(args.before),
+            load_snapshot(args.after),
+            allow_incomplete=args.allow_incomplete,
+            allow_sampled=args.allow_sampled,
+        )
         body = json.dumps(plan.to_dict(), ensure_ascii=False, indent=2) + "\n"
         if args.output:
             args.output.write_text(body, encoding="utf-8")
         else:
             print(body, end="")
-        return 0 if plan.safe else 1
+        return 0 if plan.safe_to_apply else 1
+
+    result = compare_snapshots(
+        load_snapshot(args.before),
+        load_snapshot(args.after),
+        allow_incomplete=args.allow_incomplete,
+    )
 
     changes = result.changes
     if not args.include_unchanged:

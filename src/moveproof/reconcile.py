@@ -4,7 +4,8 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from .model import ChangeSet
+from .compare import compare_snapshots
+from .model import ChangeSet, FingerprintMode, Snapshot
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,22 +34,28 @@ class ReconciliationConflict:
 class ReconciliationPlan:
     moves: tuple[ReconciliationMove, ...]
     conflicts: tuple[ReconciliationConflict, ...]
+    fingerprint_mode: FingerprintMode
     schema_version: int = 1
 
     @property
-    def safe(self) -> bool:
-        return not self.conflicts
+    def safe_to_apply(self) -> bool:
+        return self.fingerprint_mode == "full" and not self.conflicts
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,
-            "safe": self.safe,
+            "fingerprint_mode": self.fingerprint_mode,
+            "safe_to_apply": self.safe_to_apply,
             "moves": [asdict(move) for move in self.moves],
             "conflicts": [conflict.to_dict() for conflict in self.conflicts],
         }
 
 
-def create_reconciliation_plan(changes: ChangeSet) -> ReconciliationPlan:
+def _plan_from_changes(
+    changes: ChangeSet,
+    *,
+    fingerprint_mode: FingerprintMode,
+) -> ReconciliationPlan:
     moves = tuple(
         ReconciliationMove(
             old_path=change.old.path,
@@ -79,4 +86,28 @@ def create_reconciliation_plan(changes: ChangeSet) -> ReconciliationPlan:
         )
         for fingerprint, paths in sorted(ambiguous.items())
     )
-    return ReconciliationPlan(moves=moves, conflicts=conflicts)
+    return ReconciliationPlan(
+        moves=moves,
+        conflicts=conflicts,
+        fingerprint_mode=fingerprint_mode,
+    )
+
+
+def create_reconciliation_plan(
+    before: Snapshot,
+    after: Snapshot,
+    *,
+    allow_incomplete: bool = False,
+    allow_sampled: bool = False,
+) -> ReconciliationPlan:
+    if before.mode != "full" and not allow_sampled:
+        raise ValueError(
+            "reconciliation plans require full fingerprints; pass allow_sampled=True "
+            "for an advisory plan that is not safe to apply automatically"
+        )
+    changes = compare_snapshots(
+        before,
+        after,
+        allow_incomplete=allow_incomplete,
+    )
+    return _plan_from_changes(changes, fingerprint_mode=before.mode)

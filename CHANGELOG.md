@@ -19,6 +19,7 @@
 ### 安全性
 
 - fingerprint読取中のfile変更を検出
+- 自動適用可能なreconciliation planには完全fingerprintを必須化
 - 異なるfingerprint方式・sampling幅のsnapshot比較を拒否
 - symlinkを既定で追跡しない
 - 不完全なsnapshot比較を既定で拒否

@@ -220,13 +220,13 @@ class SnapshotTests(unittest.TestCase):
             root = Path(directory)
             (root / "old.jpg").write_text("photo", encoding="utf-8")
             (root / "removed.jpg").write_text("removed", encoding="utf-8")
-            before = create_snapshot(root)
+            before = create_snapshot(root, full=True)
             (root / "old.jpg").rename(root / "new.jpg")
             (root / "removed.jpg").unlink()
             (root / "added.jpg").write_text("added", encoding="utf-8")
-            plan = create_reconciliation_plan(compare_snapshots(before, create_snapshot(root)))
+            plan = create_reconciliation_plan(before, create_snapshot(root, full=True))
 
-            self.assertTrue(plan.safe)
+            self.assertTrue(plan.safe_to_apply)
             self.assertEqual(len(plan.moves), 1)
             self.assertEqual(plan.moves[0].old_path, "old.jpg")
             self.assertEqual(plan.moves[0].new_path, "new.jpg")
@@ -241,21 +241,36 @@ class SnapshotTests(unittest.TestCase):
             before = root / "before.json"
             after = root / "after.json"
             output = root / "plan.json"
-            self.assertEqual(main(["snapshot", str(media), "-o", str(before)]), 0)
+            self.assertEqual(main(["snapshot", str(media), "--full", "-o", str(before)]), 0)
             for path in media.iterdir():
                 path.unlink()
             for name in ("new-a.jpg", "new-b.jpg"):
                 (media / name).write_text("same", encoding="utf-8")
-            self.assertEqual(main(["snapshot", str(media), "-o", str(after)]), 0)
+            self.assertEqual(main(["snapshot", str(media), "--full", "-o", str(after)]), 0)
 
             self.assertEqual(
                 main(["reconcile", str(before), str(after), "-o", str(output)]),
                 1,
             )
             value = json.loads(output.read_text(encoding="utf-8"))
-            self.assertFalse(value["safe"])
+            self.assertFalse(value["safe_to_apply"])
             self.assertEqual(value["conflicts"][0]["old_paths"], ["old-a.jpg", "old-b.jpg"])
             self.assertEqual(value["conflicts"][0]["new_paths"], ["new-a.jpg", "new-b.jpg"])
+
+    def test_reconciliation_requires_full_fingerprints_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "old.jpg").write_text("photo", encoding="utf-8")
+            before = create_snapshot(root)
+            (root / "old.jpg").rename(root / "new.jpg")
+            after = create_snapshot(root)
+
+            with self.assertRaisesRegex(ValueError, "require full fingerprints"):
+                create_reconciliation_plan(before, after)
+
+            advisory = create_reconciliation_plan(before, after, allow_sampled=True)
+            self.assertFalse(advisory.safe_to_apply)
+            self.assertEqual(advisory.fingerprint_mode, "sampled")
 
 
 if __name__ == "__main__":
