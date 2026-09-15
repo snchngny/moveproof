@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from moveproof import (
     ScanIssue,
+    Snapshot,
     compare_snapshots,
     create_reconciliation_plan,
     create_snapshot,
@@ -271,6 +272,68 @@ class SnapshotTests(unittest.TestCase):
             advisory = create_reconciliation_plan(before, after, allow_sampled=True)
             self.assertFalse(advisory.safe_to_apply)
             self.assertEqual(advisory.fingerprint_mode, "sampled")
+
+    def test_reconciliation_detects_verified_root_move(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            old_root = base / "old-mount"
+            new_root = base / "new-mount"
+            old_root.mkdir()
+            new_root.mkdir()
+            (old_root / "album").mkdir()
+            (new_root / "album").mkdir()
+            (old_root / "album" / "photo.jpg").write_text("photo", encoding="utf-8")
+            (new_root / "album" / "photo.jpg").write_text("photo", encoding="utf-8")
+
+            plan = create_reconciliation_plan(
+                create_snapshot(old_root, full=True),
+                create_snapshot(new_root, full=True),
+            )
+
+            self.assertTrue(plan.safe_to_apply)
+            self.assertIsNotNone(plan.root_move)
+            assert plan.root_move is not None
+            self.assertEqual(plan.root_move.old_root, str(old_root.resolve()))
+            self.assertEqual(plan.root_move.new_root, str(new_root.resolve()))
+            self.assertEqual(plan.root_move.file_count, 1)
+
+    def test_root_move_requires_identical_library_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            old_root = base / "old-mount"
+            new_root = base / "new-mount"
+            old_root.mkdir()
+            new_root.mkdir()
+            (old_root / "photo.jpg").write_text("before", encoding="utf-8")
+            (new_root / "photo.jpg").write_text("after", encoding="utf-8")
+
+            plan = create_reconciliation_plan(
+                create_snapshot(old_root, full=True),
+                create_snapshot(new_root, full=True),
+            )
+
+            self.assertIsNone(plan.root_move)
+
+    def test_incomplete_reconciliation_is_never_safe_to_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "photo.jpg").write_text("photo", encoding="utf-8")
+            complete = create_snapshot(root, full=True)
+            incomplete = Snapshot(
+                root=complete.root,
+                mode=complete.mode,
+                records=complete.records,
+                issues=(ScanIssue("unreadable.jpg", "PermissionError", "denied"),),
+            )
+
+            plan = create_reconciliation_plan(
+                complete,
+                incomplete,
+                allow_incomplete=True,
+            )
+
+            self.assertFalse(plan.complete)
+            self.assertFalse(plan.safe_to_apply)
 
 
 if __name__ == "__main__":

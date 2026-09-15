@@ -31,21 +31,32 @@ class ReconciliationConflict:
 
 
 @dataclass(frozen=True, slots=True)
+class ReconciliationRootMove:
+    old_root: str
+    new_root: str
+    file_count: int
+
+
+@dataclass(frozen=True, slots=True)
 class ReconciliationPlan:
     moves: tuple[ReconciliationMove, ...]
     conflicts: tuple[ReconciliationConflict, ...]
     fingerprint_mode: FingerprintMode
+    complete: bool
+    root_move: ReconciliationRootMove | None = None
     schema_version: int = 1
 
     @property
     def safe_to_apply(self) -> bool:
-        return self.fingerprint_mode == "full" and not self.conflicts
+        return self.fingerprint_mode == "full" and self.complete and not self.conflicts
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,
             "fingerprint_mode": self.fingerprint_mode,
+            "complete": self.complete,
             "safe_to_apply": self.safe_to_apply,
+            "root_move": asdict(self.root_move) if self.root_move else None,
             "moves": [asdict(move) for move in self.moves],
             "conflicts": [conflict.to_dict() for conflict in self.conflicts],
         }
@@ -55,6 +66,8 @@ def _plan_from_changes(
     changes: ChangeSet,
     *,
     fingerprint_mode: FingerprintMode,
+    complete: bool,
+    root_move: ReconciliationRootMove | None = None,
 ) -> ReconciliationPlan:
     moves = tuple(
         ReconciliationMove(
@@ -90,6 +103,29 @@ def _plan_from_changes(
         moves=moves,
         conflicts=conflicts,
         fingerprint_mode=fingerprint_mode,
+        complete=complete,
+        root_move=root_move,
+    )
+
+
+def _detect_root_move(
+    before: Snapshot,
+    after: Snapshot,
+) -> ReconciliationRootMove | None:
+    if before.root == after.root or not before.records or before.issues or after.issues:
+        return None
+    before_records = {
+        record.path: (record.size, record.fingerprint) for record in before.records
+    }
+    after_records = {
+        record.path: (record.size, record.fingerprint) for record in after.records
+    }
+    if before_records != after_records:
+        return None
+    return ReconciliationRootMove(
+        old_root=before.root,
+        new_root=after.root,
+        file_count=len(before.records),
     )
 
 
@@ -110,4 +146,9 @@ def create_reconciliation_plan(
         after,
         allow_incomplete=allow_incomplete,
     )
-    return _plan_from_changes(changes, fingerprint_mode=before.mode)
+    return _plan_from_changes(
+        changes,
+        fingerprint_mode=before.mode,
+        complete=not before.issues and not after.issues,
+        root_move=_detect_root_move(before, after),
+    )

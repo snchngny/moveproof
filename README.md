@@ -48,7 +48,9 @@ moveproof snapshot media --full --output after.json
 moveproof reconcile before.json after.json --output plan.json
 ```
 
-`--allow-sampled`は候補確認用のadvisory planを作りますが、部分fingerprintだけでは完全一致を保証できないため`safe_to_apply`はtrueになりません。
+`--allow-sampled`や`--allow-incomplete`は候補確認用のadvisory planを作れますが、完全一致を保証できないため`safe_to_apply`はtrueになりません。
+
+libraryのmount先やroot directoryだけを変更した場合は、完全fingerprint、relative path、file集合がすべて一致すると`root_move`を出力します。DBを直接変更せず、旧rootから新rootへの置換計画を事前確認できます。
 
 対象をrelative pathのglobで絞れます。excludeはincludeより優先され、指定条件はsnapshotへ保存されます。異なる条件のsnapshot比較は誤判定を避けるため拒否されます。
 

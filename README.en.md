@@ -39,7 +39,9 @@ moveproof snapshot media --full --output after.json
 moveproof reconcile before.json after.json --output plan.json
 ```
 
-`--allow-sampled` emits an advisory plan, but `safe_to_apply` remains false because sampled fingerprints do not prove exact content identity.
+`--allow-sampled` and `--allow-incomplete` can emit advisory plans, but `safe_to_apply` remains false because they do not prove a complete exact match.
+
+When only a library mount point or root directory changes, Moveproof emits a `root_move` if the full fingerprints, relative paths, and complete file set all match. This lets you review an old-root to new-root replacement plan before touching a database.
 
 Limit a scan with relative-path globs. Excludes take precedence over includes, and the filter profile is stored in the snapshot. Snapshots with different filters cannot be compared accidentally.
 

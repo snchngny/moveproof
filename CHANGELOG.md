@@ -14,12 +14,14 @@
 - 変更、移動、copy、追加、削除、曖昧な重複の分類
 - Python APIとCLI
 - path更新前に安全な移動候補と曖昧な競合を分離するreconciliation plan API・CLI
+- 完全に一致するlibrary treeのroot・mount変更検出
 - Windows、macOS、Linux向けCI
 
 ### 安全性
 
 - fingerprint読取中のfile変更を検出
 - 自動適用可能なreconciliation planには完全fingerprintを必須化
+- 不完全なsnapshotから作るplanは自動適用不可
 - 異なるfingerprint方式・sampling幅のsnapshot比較を拒否
 - symlinkを既定で追跡しない
 - 不完全なsnapshot比較を既定で拒否
