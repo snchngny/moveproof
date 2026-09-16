@@ -30,7 +30,7 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
-Before updating paths in a database or media index, create a dry-run plan containing only move candidates. An automatically applicable plan requires snapshots with full fingerprints. Ambiguous identical-content matches produce `safe_to_apply: false` and exit code 1 so automation can stop. This command does not modify files or databases.
+Before updating paths in a database or media index, create a dry-run plan containing only move candidates. An automatically applicable plan requires snapshots with full fingerprints. Any unresolved ambiguity, modification, copy, addition, or removal is reported in `unresolved_changes` and produces `safe_to_apply: false` with exit code 1 so automation can stop. This command does not modify files or databases.
 
 ```bash
 moveproof snapshot media --full --output before.json

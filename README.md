@@ -39,7 +39,7 @@ moveproof snapshot media --output after.json
 moveproof compare before.json after.json
 ```
 
-DBやmedia indexのpathを安全に引き継ぐ前に、移動候補だけのdry-run planを作れます。自動適用可能なplanには完全fingerprintのsnapshotが必要です。曖昧な同一内容候補がある場合は`safe_to_apply: false`を出力し、終了code 1で自動適用を止めます。このcommand自体はfileやDBを変更しません。
+DBやmedia indexのpathを安全に引き継ぐ前に、移動候補だけのdry-run planを作れます。自動適用可能なplanには完全fingerprintのsnapshotが必要です。曖昧な候補、変更、copy、追加、削除が一件でも残る場合は`unresolved_changes`と`safe_to_apply: false`を出力し、終了code 1で自動適用を止めます。このcommand自体はfileやDBを変更しません。
 
 ```bash
 moveproof snapshot media --full --output before.json

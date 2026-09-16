@@ -216,7 +216,7 @@ class SnapshotTests(unittest.TestCase):
             self.assertEqual(value["changes"][0]["old"]["path"], "file")
             self.assertEqual(value["changes"][0]["new"]["path"], "renamed")
 
-    def test_reconciliation_plan_contains_only_safe_moves(self) -> None:
+    def test_reconciliation_plan_reports_unresolved_changes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "old.jpg").write_text("photo", encoding="utf-8")
@@ -227,10 +227,25 @@ class SnapshotTests(unittest.TestCase):
             (root / "added.jpg").write_text("added", encoding="utf-8")
             plan = create_reconciliation_plan(before, create_snapshot(root, full=True))
 
-            self.assertTrue(plan.safe_to_apply)
+            self.assertFalse(plan.safe_to_apply)
             self.assertEqual(len(plan.moves), 1)
             self.assertEqual(plan.moves[0].old_path, "old.jpg")
             self.assertEqual(plan.moves[0].new_path, "new.jpg")
+            self.assertEqual(plan.unresolved_changes.added, 1)
+            self.assertEqual(plan.unresolved_changes.removed, 1)
+            self.assertEqual(plan.unresolved_changes.total, 2)
+
+    def test_reconciliation_with_only_unambiguous_moves_is_safe(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "old.jpg").write_text("photo", encoding="utf-8")
+            before = create_snapshot(root, full=True)
+            (root / "old.jpg").rename(root / "new.jpg")
+
+            plan = create_reconciliation_plan(before, create_snapshot(root, full=True))
+
+            self.assertTrue(plan.safe_to_apply)
+            self.assertEqual(plan.unresolved_changes.total, 0)
 
     def test_reconcile_cli_reports_ambiguous_matches_as_conflicts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

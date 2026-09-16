@@ -6,6 +6,7 @@ from .reconcile import (
     ReconciliationMove,
     ReconciliationPlan,
     ReconciliationRootMove,
+    UnresolvedChanges,
     create_reconciliation_plan,
 )
 from .snapshot import create_snapshot, load_snapshot, save_snapshot
@@ -21,6 +22,7 @@ __all__ = [
     "ReconciliationMove",
     "ReconciliationPlan",
     "ReconciliationRootMove",
+    "UnresolvedChanges",
     "compare_snapshots",
     "create_reconciliation_plan",
     "create_snapshot",
