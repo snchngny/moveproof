@@ -50,6 +50,14 @@ moveproof reconcile before.json after.json --output plan.json
 
 `--allow-sampled`や`--allow-incomplete`は候補確認用のadvisory planを作れますが、完全一致を保証できないため`safe_to_apply`はtrueになりません。
 
+自動処理の前にbaselineと現在のlibraryを比較し、不完全なscan、空のmount、大量のfile消失を検出できます。既定ではbaselineの10%を超えるfileが見つからない場合に終了code 1で後続処理を止めます。移動・改名は消失として数えません。このcommandもfileやDBを変更しません。
+
+```bash
+moveproof snapshot media --output baseline.json
+moveproof guard baseline.json media --output guard.json
+moveproof guard baseline.json media --max-missing-ratio 0.02
+```
+
 libraryのmount先やroot directoryだけを変更した場合は、完全fingerprint、relative path、file集合がすべて一致すると`root_move`を出力します。DBを直接変更せず、旧rootから新rootへの置換計画を事前確認できます。
 
 対象をrelative pathのglobで絞れます。excludeはincludeより優先され、指定条件はsnapshotへ保存されます。異なる条件のsnapshot比較は誤判定を避けるため拒否されます。
@@ -81,6 +89,8 @@ benchmarkは同じfileを繰り返し読むため、OS cache、storage、sparse 
 変更提案は[Contribution guide](CONTRIBUTING.md)、脆弱性報告は[Security policy](SECURITY.md)を確認してください。
 
 保守者向けの公開手順は[Release手順](docs/release.md)にあります。
+
+OSSから統合productまでの開発順序は[Roadmap](docs/roadmap.md)にあります。
 
 ## License
 

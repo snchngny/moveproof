@@ -122,6 +122,7 @@ def create_snapshot(
         sample_bytes=None if full else sample_bytes,
         include_patterns=includes,
         exclude_patterns=excludes,
+        include_hidden=include_hidden,
     )
 
 

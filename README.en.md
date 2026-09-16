@@ -41,6 +41,14 @@ moveproof reconcile before.json after.json --output plan.json
 
 `--allow-sampled` and `--allow-incomplete` can emit advisory plans, but `safe_to_apply` remains false because they do not prove a complete exact match.
 
+Before running automation, compare a baseline with the current library and block incomplete scans, empty mounts, or mass file disappearance. The default threshold is 10% of the baseline. Moves and renames do not count as missing files. This command is also read-only.
+
+```bash
+moveproof snapshot media --output baseline.json
+moveproof guard baseline.json media --output guard.json
+moveproof guard baseline.json media --max-missing-ratio 0.02
+```
+
 When only a library mount point or root directory changes, Moveproof emits a `root_move` if the full fingerprints, relative paths, and complete file set all match. This lets you review an old-root to new-root replacement plan before touching a database.
 
 Limit a scan with relative-path globs. Excludes take precedence over includes, and the filter profile is stored in the snapshot. Snapshots with different filters cannot be compared accidentally.
@@ -68,6 +76,8 @@ python benchmarks/benchmark_fingerprint.py --size-mib 256
 The benchmark repeatedly reads the same file and is affected by the OS cache, storage, and sparse-file support. Include the environment and run parameters when publishing results.
 
 See the [contribution guide](CONTRIBUTING.md) before proposing changes and the [security policy](SECURITY.md) before reporting a vulnerability.
+
+See the [roadmap](docs/roadmap.md) for the path from reusable OSS components to a local-first product.
 
 ## License
 

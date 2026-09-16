@@ -1,5 +1,6 @@
 from .compare import compare_snapshots
 from .fingerprint import FileChangedError, fingerprint_file
+from .guard import LibraryGuardReport, check_library_guard
 from .model import Change, ChangeSet, FileRecord, ScanIssue, Snapshot
 from .reconcile import (
     ReconciliationConflict,
@@ -16,6 +17,7 @@ __all__ = [
     "ChangeSet",
     "FileChangedError",
     "FileRecord",
+    "LibraryGuardReport",
     "ScanIssue",
     "Snapshot",
     "ReconciliationConflict",
@@ -24,6 +26,7 @@ __all__ = [
     "ReconciliationRootMove",
     "UnresolvedChanges",
     "compare_snapshots",
+    "check_library_guard",
     "create_reconciliation_plan",
     "create_snapshot",
     "fingerprint_file",

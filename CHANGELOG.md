@@ -16,6 +16,8 @@
 - path更新前に安全な移動候補と曖昧な競合を分離するreconciliation plan API・CLI
 - 完全に一致するlibrary treeのroot・mount変更検出
 - Windows、macOS、Linux向けCI
+- baseline比の大量消失、不完全scan、空libraryを検出するguard API・CLI
+- OSS部品からlocal-first productへつなぐroadmap
 
 ### 安全性
 
@@ -26,3 +28,4 @@
 - 異なるfingerprint方式・sampling幅のsnapshot比較を拒否
 - symlinkを既定で追跡しない
 - 不完全なsnapshot比較を既定で拒否
+- snapshotへhidden file方針を保存し、異なる方針の比較を拒否

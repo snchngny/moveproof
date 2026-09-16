@@ -56,6 +56,7 @@ class Snapshot:
     sample_bytes: int | None = None
     include_patterns: tuple[str, ...] = ()
     exclude_patterns: tuple[str, ...] = ()
+    include_hidden: bool = False
     schema_version: int = 1
 
     def to_dict(self) -> dict[str, Any]:
@@ -66,6 +67,7 @@ class Snapshot:
             "sample_bytes": self.sample_bytes,
             "include_patterns": list(self.include_patterns),
             "exclude_patterns": list(self.exclude_patterns),
+            "include_hidden": self.include_hidden,
             "records": [asdict(record) for record in self.records],
             "issues": [asdict(issue) for issue in self.issues],
         }
@@ -82,6 +84,9 @@ class Snapshot:
         sample_bytes = None if raw_sample_bytes is None else int(raw_sample_bytes)
         if mode == "sampled" and (sample_bytes is None or sample_bytes < 1):
             raise ValueError("sampled snapshots require a positive sample_bytes value")
+        include_hidden = value.get("include_hidden", False)
+        if not isinstance(include_hidden, bool):
+            raise ValueError("include_hidden must be a boolean")
         return cls(
             root=str(value["root"]),
             mode=mode,  # type: ignore[arg-type]
@@ -90,6 +95,7 @@ class Snapshot:
             sample_bytes=sample_bytes,
             include_patterns=tuple(str(item) for item in value.get("include_patterns", [])),
             exclude_patterns=tuple(str(item) for item in value.get("exclude_patterns", [])),
+            include_hidden=include_hidden,
         )
 
 

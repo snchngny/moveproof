@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Sequence
 
 from .compare import compare_snapshots
+from .guard import check_library_guard
 from .reconcile import create_reconciliation_plan
 from .snapshot import create_snapshot, load_snapshot, save_snapshot
 
@@ -59,6 +60,20 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="emit an advisory plan that cannot be applied automatically",
     )
+
+    guard = commands.add_parser(
+        "guard",
+        help="block automation when a library scan looks unsafe",
+    )
+    guard.add_argument("baseline", type=Path)
+    guard.add_argument("root", type=Path)
+    guard.add_argument("--output", "-o", type=Path)
+    guard.add_argument(
+        "--max-missing-ratio",
+        type=float,
+        default=0.1,
+        help="block when the removed-file ratio exceeds this value (default: 0.1)",
+    )
     return parser
 
 
@@ -89,6 +104,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(body, end="")
         return 0 if plan.safe_to_apply else 1
+
+    if args.command == "guard":
+        baseline = load_snapshot(args.baseline)
+        current = create_snapshot(
+            args.root,
+            full=baseline.mode == "full",
+            include_hidden=baseline.include_hidden,
+            sample_bytes=baseline.sample_bytes or 64 * 1024,
+            on_error="record",
+            include_patterns=baseline.include_patterns,
+            exclude_patterns=baseline.exclude_patterns,
+        )
+        report = check_library_guard(
+            baseline,
+            current,
+            max_missing_ratio=args.max_missing_ratio,
+        )
+        body = json.dumps(report.to_dict(), ensure_ascii=False, indent=2) + "\n"
+        if args.output:
+            args.output.write_text(body, encoding="utf-8")
+        else:
+            print(body, end="")
+        return 0 if report.safe_to_continue else 1
 
     result = compare_snapshots(
         load_snapshot(args.before),

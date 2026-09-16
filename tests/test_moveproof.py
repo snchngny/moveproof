@@ -9,6 +9,7 @@ from unittest.mock import patch
 from moveproof import (
     ScanIssue,
     Snapshot,
+    check_library_guard,
     compare_snapshots,
     create_reconciliation_plan,
     create_snapshot,
@@ -138,6 +139,16 @@ class SnapshotTests(unittest.TestCase):
                 compare_snapshots(
                     create_snapshot(root),
                     create_snapshot(root, include_patterns=("*.wav",)),
+                )
+
+    def test_different_hidden_file_policies_cannot_be_compared(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file").write_text("value", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "different hidden-file policies"):
+                compare_snapshots(
+                    create_snapshot(root),
+                    create_snapshot(root, include_hidden=True),
                 )
 
     def test_scan_can_record_a_file_error(self) -> None:
@@ -349,6 +360,88 @@ class SnapshotTests(unittest.TestCase):
 
             self.assertFalse(plan.complete)
             self.assertFalse(plan.safe_to_apply)
+
+
+class LibraryGuardTests(unittest.TestCase):
+    def test_guard_allows_a_rename(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "old.jpg").write_text("photo", encoding="utf-8")
+            baseline = create_snapshot(root)
+            (root / "old.jpg").rename(root / "new.jpg")
+
+            report = check_library_guard(baseline, create_snapshot(root))
+
+            self.assertTrue(report.safe_to_continue)
+            self.assertEqual(report.change_counts["moved"], 1)
+
+    def test_guard_blocks_mass_removal(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for index in range(4):
+                (root / f"{index}.jpg").write_text(str(index), encoding="utf-8")
+            baseline = create_snapshot(root)
+            (root / "0.jpg").unlink()
+            (root / "1.jpg").unlink()
+
+            report = check_library_guard(
+                baseline,
+                create_snapshot(root),
+                max_missing_ratio=0.25,
+            )
+
+            self.assertFalse(report.safe_to_continue)
+            self.assertEqual(report.missing_files, 2)
+            self.assertEqual(report.missing_ratio, 0.5)
+            self.assertIn("missing_ratio_exceeded", report.reasons)
+
+    def test_guard_blocks_an_empty_library_even_at_full_tolerance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "photo.jpg").write_text("photo", encoding="utf-8")
+            baseline = create_snapshot(root)
+            (root / "photo.jpg").unlink()
+
+            report = check_library_guard(
+                baseline,
+                create_snapshot(root),
+                max_missing_ratio=1,
+            )
+
+            self.assertFalse(report.safe_to_continue)
+            self.assertIn("library_empty", report.reasons)
+
+    def test_guard_cli_reuses_baseline_scan_options(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            media = root / "media"
+            media.mkdir()
+            (media / ".hidden").write_text("hidden", encoding="utf-8")
+            (media / "keep.wav").write_text("keep", encoding="utf-8")
+            (media / "skip.txt").write_text("skip", encoding="utf-8")
+            baseline_path = root / "baseline.json"
+            output = root / "guard.json"
+            baseline = create_snapshot(
+                media,
+                include_hidden=True,
+                include_patterns=("*.wav", ".hidden"),
+            )
+            save_snapshot(baseline, baseline_path)
+
+            self.assertEqual(
+                main(["guard", str(baseline_path), str(media), "-o", str(output)]),
+                0,
+            )
+            value = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(value["safe_to_continue"])
+            self.assertEqual(value["current_files"], 2)
+
+    def test_guard_rejects_an_empty_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = create_snapshot(root)
+            with self.assertRaisesRegex(ValueError, "non-empty baseline"):
+                check_library_guard(baseline, create_snapshot(root))
 
 
 if __name__ == "__main__":

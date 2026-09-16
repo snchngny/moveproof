@@ -27,6 +27,8 @@ def compare_snapshots(
         or before.exclude_patterns != after.exclude_patterns
     ):
         raise ValueError("snapshots use different path filters")
+    if before.include_hidden != after.include_hidden:
+        raise ValueError("snapshots use different hidden-file policies")
     if not allow_incomplete and (before.issues or after.issues):
         raise ValueError("cannot compare incomplete snapshots without allow_incomplete=True")
 
