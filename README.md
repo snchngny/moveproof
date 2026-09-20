@@ -12,9 +12,13 @@
 
 ## インストール
 
+PyPIへの初回公開前です。現在はGitHubの`main`からインストールしてください。
+
 ```bash
-pip install moveproof
+python -m pip install "moveproof @ git+https://github.com/snchngny/moveproof.git@main"
 ```
+
+インストール後に`moveproof --help`が表示されれば準備完了です。
 
 ## Python API
 
@@ -91,6 +95,10 @@ benchmarkは同じfileを繰り返し読むため、OS cache、storage、sparse 
 保守者向けの公開手順は[Release手順](docs/release.md)にあります。
 
 OSSから統合productまでの開発順序は[Roadmap](docs/roadmap.md)にあります。
+
+## 開発を支援
+
+継続開発は[GitHub Sponsors](https://github.com/sponsors/snchngny)から支援できます。
 
 ## License
 

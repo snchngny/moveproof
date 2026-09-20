@@ -25,6 +25,7 @@ moveproof = "moveproof.cli:main"
 [project.urls]
 Repository = "https://github.com/snchngny/moveproof"
 Issues = "https://github.com/snchngny/moveproof/issues"
+Funding = "https://github.com/sponsors/snchngny"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/moveproof"]
