@@ -12,10 +12,8 @@
 
 ## インストール
 
-PyPIへの初回公開前です。現在はGitHubの`main`からインストールしてください。
-
 ```bash
-python -m pip install "moveproof @ git+https://github.com/snchngny/moveproof.git@main"
+python -m pip install moveproof
 ```
 
 インストール後に`moveproof --help`が表示されれば準備完了です。

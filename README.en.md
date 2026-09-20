@@ -4,10 +4,8 @@ Moveproof is a zero-dependency Python library for identifying large local files 
 
 ## Install
 
-Moveproof has not had its first PyPI release yet. Install the current `main` branch from GitHub.
-
 ```bash
-python -m pip install "moveproof @ git+https://github.com/snchngny/moveproof.git@main"
+python -m pip install moveproof
 ```
 
 Run `moveproof --help` after installation to verify the command is available.
