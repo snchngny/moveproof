@@ -105,7 +105,7 @@ python -m build
 python benchmarks/benchmark_fingerprint.py --size-mib 256
 ```
 
-benchmarkは同じfileを繰り返し読むため、OS cache、storage、sparse file対応の影響を受けます。結果を掲載するときは環境と実行条件を併記してください。
+benchmarkは一時fileに乱数を書き込んでから計測します。既存の写真・動画には触れません。同じfileを繰り返し読むため、OS cacheやstorageの影響を受けます。再現条件と実測例は[benchmark](docs/benchmark.md)を参照してください。
 
 変更提案は[Contribution guide](CONTRIBUTING.md)、脆弱性報告は[Security policy](SECURITY.md)を確認してください。
 
