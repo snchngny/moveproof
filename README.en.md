@@ -2,6 +2,17 @@
 
 Moveproof is a zero-dependency Python library for identifying large local files without reading them in full on every scan. It compares snapshots and reports modifications, renames, moves, copies, additions, and removals.
 
+## How it differs
+
+| Need | Best fit |
+| --- | --- |
+| Observe filesystem operations while a process is running | [watchdog](https://python-watchdog.readthedocs.io/) |
+| Build JSON manifests and report added, changed, and deleted files | [file-watchman](https://pypi.org/project/file-watchman/) |
+| Replay inode-detected renames before running `rsync` | [irsync](https://pypi.org/project/irsync/) |
+| Compare snapshots across offline periods, classify moves, renames, and copies by content fingerprint, and produce a safe dry-run plan | **Moveproof** |
+
+Moveproof does not watch, synchronize, or deduplicate files. It is the identification and comparison layer for preserving tags, history, and database records when paths in a local library change.
+
 ## Install
 
 ```bash

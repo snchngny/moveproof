@@ -10,6 +10,17 @@
 - バックアップやメディア管理ツールで、追加・削除・移動を区別する
 - 部分フィンガープリントの形式をversion付きで保存し、将来の方式変更を安全に扱う
 
+## 似たツールとの違い
+
+| 必要なこと | 適したツール |
+| --- | --- |
+| 実行中のファイル操作をリアルタイムに監視する | [watchdog](https://python-watchdog.readthedocs.io/) |
+| JSON manifestを作り、追加・変更・削除を比較する | [file-watchman](https://pypi.org/project/file-watchman/) |
+| `rsync`前にinodeを使って改名・移動を反映する | [irsync](https://pypi.org/project/irsync/) |
+| オフライン期間を挟む2つのsnapshotから、内容fingerprintで移動・改名・copyを分類し、安全なdry-run planを作る | **Moveproof** |
+
+Moveproofはファイル監視、同期、重複削除を行いません。ローカルlibraryのpathが変わった後も、既存のタグ、履歴、DB recordを安全に引き継ぐための識別・比較層です。
+
 ## インストール
 
 ```bash
