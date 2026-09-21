@@ -21,6 +21,14 @@ python -m pip install moveproof
 
 Run `moveproof --help` after installation to verify the command is available.
 
+If you have checked out the repository, run the [temporary-directory move demo](examples/media_library_move.py). It does not touch your files or database.
+
+```bash
+python examples/media_library_move.py
+```
+
+It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_apply: true`. This indicates an unambiguous candidate, not that a database update or backup has been performed.
+
 ## Python API
 
 ```python
@@ -94,7 +102,7 @@ See the [roadmap](docs/roadmap.md) for the path from reusable OSS components to 
 
 ## Support development
 
-Support continued development through [GitHub Sponsors](https://github.com/sponsors/snchngny).
+If you use Moveproof to migrate an audio, photo, or video library, [share your use case](https://github.com/snchngny/moveproof/issues/new?template=feature.yml) with file count, size, and integration target. Support compatibility testing and ongoing OSS development through [GitHub Sponsors](https://github.com/sponsors/snchngny). Sponsorship does not guarantee a feature deadline or individual support.
 
 ## License
 

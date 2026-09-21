@@ -36,3 +36,4 @@ jobs:
       - run: python -m twine check dist/*
       - run: python -m pip install dist/*.whl
       - run: python -c "import moveproof; print(moveproof.__all__)"
+      - run: python examples/media_library_move.py

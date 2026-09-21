@@ -29,6 +29,14 @@ python -m pip install moveproof
 
 インストール後に`moveproof --help`が表示されれば準備完了です。
 
+リポジトリを取得済みなら、[一時フォルダだけを使う移動検出デモ](examples/media_library_move.py)を実行できます。自分のファイルやDBは変更しません。
+
+```bash
+python examples/media_library_move.py
+```
+
+`samples/kick.wav`から`archive/kick.wav`への移動と`safe_to_apply: true`が表示されます。この値は候補の曖昧さがないことを示すだけで、DBへの適用やbackupを実行するものではありません。
+
 ## Python API
 
 ```python
@@ -107,7 +115,7 @@ OSSから統合productまでの開発順序は[Roadmap](docs/roadmap.md)にあ�
 
 ## 開発を支援
 
-継続開発は[GitHub Sponsors](https://github.com/sponsors/snchngny)から支援できます。
+音源・写真・動画libraryの移行で使う場合は、ファイル数・容量・組込先を添えて[利用例を報告](https://github.com/snchngny/moveproof/issues/new?template=feature.yml)してください。互換性テストとOSSの継続開発は[GitHub Sponsors](https://github.com/sponsors/snchngny)から支援できます。支援は機能の納期や個別supportを保証しません。
 
 ## License
 
