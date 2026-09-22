@@ -31,6 +31,8 @@ python -m pip install moveproof
 
 リポジトリを取得済みなら、[一時フォルダだけを使う移動検出デモ](examples/media_library_move.py)を実行できます。自分のファイルやDBは変更しません。
 
+Immich外部ライブラリを整理する場合は、[移動前後の読取専用監査手順](docs/immich-external-library.md)を参照してください。Moveproofはファイル対応の候補を示しますが、Immich内のアルバムなどのmetadataは保護・復旧しません。
+
 ```bash
 python examples/media_library_move.py
 ```
