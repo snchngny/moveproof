@@ -24,4 +24,20 @@ moveproof reconcile /path/to/audit/before.json /path/to/audit/after.json --outpu
 
 Immich側は自動watchや定期scanが有効なことがある。Moveproofで計画を作っても、Immichの再スキャンによるmetadata消失を止められない。既に失われたmetadataの復旧も保証しない。Immich運用を変更する前に、Immichの[backup手順](https://docs.immich.app/administration/backup-and-restore/)と現在のscan設定を確認する。
 
-この用途で不足する情報（asset ID、アルバム、重複の扱いなど）があれば、個人情報やmediaを添付せずに[利用例を知らせてほしい](https://github.com/snchngny/moveproof/issues/new?template=feature.yml)。読取専用adapterの必要性を検証する。
+## Immichのasset IDと照合する試作
+
+移動前、かつImmichが旧パスのassetを検索できる間なら、repository同梱の試作で`plan.json`の旧パスをImmichのasset IDに対応付けられる。Immichの[検索API](https://docs.immich.app/api/)へ検索リクエストだけを送り、`libraryId`とコンテナ内のrootを確認する。APIやDBへの更新は一切しない。実サーバーでの動作は未検証で、APIの変更や閲覧権限によって結果が欠ける可能性がある。
+
+```bash
+# IMMICH_API_KEYを環境変数に設定する。値をcommand行や共有logに残さない。
+python examples/immich_asset_audit.py \
+  --api-url https://your-immich.example/api \
+  --library-id YOUR_LIBRARY_ID \
+  --immich-root /mnt/photos \
+  --plan /path/to/audit/plan.json \
+  --output /path/to/audit/asset-audit.json
+```
+
+`--immich-root`はImmichコンテナ内の外部ライブラリのパスで、Moveproofのsnapshot rootと同じファイル集合を指す。`matched`は旧パスにasset IDが一つ、`ambiguous`は複数、`missing`は見つからない状態。`matched`でもImmichのmetadata保持や更新が安全だとは意味しない。API keyは環境変数からだけ読み、結果fileには含めない。結果にはasset IDとパスが含まれるためprivateに保管し、既存fileは上書きしない。通信先はHTTPS（localhostのみHTTP可）とし、必要な検索権限だけを持つAPI keyを使う。スクリプトはGitHubからrepositoryを取得して実行するもので、PyPI wheelには含まれない。
+
+この用途で不足する情報（asset ID、アルバム、重複の扱いなど）があれば、個人情報やmediaを添付せずに[利用例を知らせてほしい](https://github.com/snchngny/moveproof/issues/new?template=feature.yml)。
