@@ -4,13 +4,20 @@ build-backend = "hatchling.build"
 
 [project]
 name = "moveproof"
-version = "0.1.0"
+version = "0.1.1"
 description = "Fast, versioned file fingerprints and rename detection for local indexes"
-readme = "README.md"
+readme = "README.en.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "snchngny" }]
-keywords = ["filesystem", "fingerprint", "rename-detection", "file-index"]
+keywords = [
+  "filesystem",
+  "fingerprint",
+  "rename-detection",
+  "move-detection",
+  "media-library",
+  "immich",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",

@@ -1,5 +1,9 @@
 # Moveproof
 
+[![PyPI](https://img.shields.io/pypi/v/moveproof.svg)](https://pypi.org/project/moveproof/)
+[![CI](https://github.com/snchngny/moveproof/actions/workflows/ci.yml/badge.svg)](https://github.com/snchngny/moveproof/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/pypi/pyversions/moveproof.svg)](https://pypi.org/project/moveproof/)
+
 大きなローカルファイルを毎回すべて読まずに識別し、変更・改名・移動・コピーを検出するゼロ依存のPythonライブラリです。
 
 [English README](README.en.md)

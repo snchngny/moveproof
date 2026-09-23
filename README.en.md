@@ -1,5 +1,9 @@
 # Moveproof
 
+[![PyPI](https://img.shields.io/pypi/v/moveproof.svg)](https://pypi.org/project/moveproof/)
+[![CI](https://github.com/snchngny/moveproof/actions/workflows/ci.yml/badge.svg)](https://github.com/snchngny/moveproof/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/pypi/pyversions/moveproof.svg)](https://pypi.org/project/moveproof/)
+
 Moveproof is a zero-dependency Python library for identifying large local files without reading them in full on every scan. It compares snapshots and reports modifications, renames, moves, copies, additions, and removals.
 
 ## How it differs
@@ -21,7 +25,7 @@ python -m pip install moveproof
 
 Run `moveproof --help` after installation to verify the command is available.
 
-If you have checked out the repository, run the [temporary-directory move demo](examples/media_library_move.py). It does not touch your files or database.
+If you have checked out the repository, run the [temporary-directory move demo](https://github.com/snchngny/moveproof/blob/main/examples/media_library_move.py). It does not touch your files or database.
 
 ```bash
 python examples/media_library_move.py
@@ -29,7 +33,7 @@ python examples/media_library_move.py
 
 It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_apply: true`. This indicates an unambiguous candidate, not that a database update or backup has been performed.
 
-For Immich external library move detection, see the [tool comparison, moved-file audit, and read-only asset ID prototype](docs/immich-external-library.md). Moveproof can identify path candidates but cannot preserve or restore albums and other metadata stored only in Immich.
+For Immich external library move detection, see the [tool comparison, moved-file audit, and read-only asset ID prototype](https://github.com/snchngny/moveproof/blob/main/docs/immich-external-library.md). Moveproof can identify path candidates but cannot preserve or restore albums and other metadata stored only in Immich.
 
 ## Python API
 
@@ -96,11 +100,11 @@ A sampled fingerprint is not proof of complete byte identity. Use `--full` when 
 python benchmarks/benchmark_fingerprint.py --size-mib 256
 ```
 
-The benchmark writes random data to a temporary file before timing; it does not touch your existing media. Repeated reads are still affected by the OS cache and storage. See the [measured example and reproduction notes](docs/benchmark.md), and include your environment and run parameters when sharing results.
+The benchmark writes random data to a temporary file before timing; it does not touch your existing media. Repeated reads are still affected by the OS cache and storage. See the [measured example and reproduction notes](https://github.com/snchngny/moveproof/blob/main/docs/benchmark.md), and include your environment and run parameters when sharing results.
 
-See the [contribution guide](CONTRIBUTING.md) before proposing changes and the [security policy](SECURITY.md) before reporting a vulnerability.
+See the [contribution guide](https://github.com/snchngny/moveproof/blob/main/CONTRIBUTING.md) before proposing changes and the [security policy](https://github.com/snchngny/moveproof/blob/main/SECURITY.md) before reporting a vulnerability.
 
-See the [roadmap](docs/roadmap.md) for the path from reusable OSS components to a local-first product.
+See the [roadmap](https://github.com/snchngny/moveproof/blob/main/docs/roadmap.md) for the path from reusable OSS components to a local-first product.
 
 ## Support development
 

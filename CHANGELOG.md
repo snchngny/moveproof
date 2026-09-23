@@ -2,6 +2,17 @@
 
 このprojectは[Semantic Versioning](https://semver.org/)に従う。
 
+## 0.1.1 - 2026-09-23
+
+### 改善
+
+- PyPIの説明を英語READMEへ切り替え、media library・Immichの検索語をpackage metadataへ追加
+- 一時directoryだけを使う移動検出demoを追加
+- 疎な全ゼロfileではなく実データを書き込むfingerprint benchmarkと実測条件を追加
+- Immich外部ライブラリ向けの既存ツール比較、読取専用監査手順、asset ID照合の試作を追加
+
+runtime libraryのAPIと動作に変更はない。
+
 ## 0.1.0 - 2026-09-20
 
 ### 追加
