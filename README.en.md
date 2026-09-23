@@ -29,7 +29,7 @@ python examples/media_library_move.py
 
 It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_apply: true`. This indicates an unambiguous candidate, not that a database update or backup has been performed.
 
-For Immich external libraries, see the [moved-file audit and read-only asset ID prototype](docs/immich-external-library.md). Moveproof can identify path candidates but cannot preserve or restore albums and other metadata stored only in Immich.
+For Immich external library move detection, see the [tool comparison, moved-file audit, and read-only asset ID prototype](docs/immich-external-library.md). Moveproof can identify path candidates but cannot preserve or restore albums and other metadata stored only in Immich.
 
 ## Python API
 

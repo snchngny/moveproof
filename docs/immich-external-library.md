@@ -4,6 +4,19 @@ Immichの[外部ライブラリの公式説明](https://docs.immich.app/features
 
 Moveproofができるのは、移動前後のファイル内容を照合し、旧パスと新パスの対応候補や曖昧さを読取専用で示すことまで。**Immichのasset IDやmetadataを保持・復旧する機能ではない。** `safe_to_apply: true`もMoveproofのファイル対応が一意という意味であり、Immichへ適用して安全という意味ではない。ImmichのAPIやDBには接続・書込しない。
 
+## 目的に合う手段を選ぶ
+
+2026-09-23時点の各projectの公開説明を、ファイル移動に関係する範囲だけ比較した。Moveproofは以下の既存ツールを置き換えず、ファイルを変更する前後の証拠作りに限定する。
+
+| 目的 | 適した手段 | 主な変更先 |
+| --- | --- | --- |
+| 外部ライブラリのfolder構造からalbumを作成・同期する | [Immich Folder Album Creator](https://github.com/Salvoxia/immich-folder-album-creator) | Immichのalbum・asset属性 |
+| 内部ライブラリから外部ライブラリへcopyした後の重複を解消する | [immich-reconcile-assets-with-external-copy](https://github.com/andreiled/immich-reconcile-assets-with-external-copy) | Immich assetの更新・削除 |
+| 外部assetを内部ライブラリへ移行するPoCを試す | [immich-library-external-to-internal](https://github.com/skatsubo/immich-library-external-to-internal) | filesystem・Immich DB。test環境向け |
+| 外部ライブラリ内の移動・改名を、移動前後のsnapshotから判定する | **Moveproof** | snapshotとplanだけ。media・Immichは読取専用 |
+
+Immichそのものには[外部ライブラリの移動検出要望](https://github.com/immich-app/immich/discussions/16394)があり、同一内容の複数ファイルとmetadataの対応が未解決。[DBを直接更新するcommunity手順](https://github.com/immich-app/immich/discussions/20115)もあるが、version間のschema差分が報告されているため、Moveproofでは採用しない。公式機能や既存ツールで目的を満たせる場合はそちらを選ぶ。
+
 ## 移動前後を確認する
 
 写真・動画のbackupを別に確保したうえで、移動前に完全fingerprintのsnapshotを作る。JSONは外部ライブラリの外に保存する。以下のパスは自分の環境に置き換える。
