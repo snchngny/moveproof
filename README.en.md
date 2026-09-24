@@ -33,7 +33,7 @@ python examples/media_library_move.py
 
 It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_apply: true`. This indicates an unambiguous candidate, not that a database update or backup has been performed.
 
-For Immich external library move detection, see the [tool comparison, moved-file audit, and read-only asset ID prototype](https://github.com/snchngny/moveproof/blob/main/docs/immich-external-library.md). Moveproof can identify path candidates but cannot preserve or restore albums and other metadata stored only in Immich.
+Immich's [external library documentation](https://docs.immich.app/features/libraries/) warns that moving a file makes a rescan treat it as a new asset, which can detach albums, descriptions, and other Immich-only metadata. For a move or rename, use the [tool comparison, before/after audit, and read-only asset ID prototype](https://github.com/snchngny/moveproof/blob/main/docs/immich-external-library.md). Moveproof identifies old-path to new-path candidates before a rescan; it does not preserve or restore Immich metadata by itself.
 
 ## Python API
 
