@@ -15,7 +15,7 @@ Moveproofができるのは、移動前後のファイル内容を照合し、�
 | 外部assetを内部ライブラリへ移行するPoCを試す | [immich-library-external-to-internal](https://github.com/skatsubo/immich-library-external-to-internal) | filesystem・Immich DB。test環境向け |
 | 外部ライブラリ内の移動・改名を、移動前後のsnapshotから判定する | **Moveproof** | snapshotとplanだけ。media・Immichは読取専用 |
 
-Immichそのものには[外部ライブラリの移動検出要望](https://github.com/immich-app/immich/discussions/16394)があり、同一内容の複数ファイルとmetadataの対応が未解決。[DBを直接更新するcommunity手順](https://github.com/immich-app/immich/discussions/20115)もあるが、version間のschema差分が報告されているため、Moveproofでは採用しない。公式機能や既存ツールで目的を満たせる場合はそちらを選ぶ。
+Immichそのものには[外部ライブラリの移動検出要望](https://github.com/immich-app/immich/discussions/16394)があり、同一内容の複数ファイルとmetadataの対応が未解決。assetを外部ライブラリへ移す[公式APIの要望](https://github.com/immich-app/immich/discussions/10092)も未実装で、[DBを直接更新するcommunity手順](https://github.com/immich-app/immich/discussions/20115)にはversion間のschema差分が報告されている。このためMoveproofはImmichへの書込を行わず、読取専用の照合結果までに限定する。公式機能や既存ツールで目的を満たせる場合はそちらを選ぶ。
 
 ## 移動前後を確認する
 
