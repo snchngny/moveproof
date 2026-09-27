@@ -11,4 +11,13 @@
 
 この条件では約237倍。部分方式は既定で先頭・中央・末尾の各64 KiBだけを読むため、完全一致の証明ではない。正確な同一性確認には完全方式を選ぶ。生成直後の同じfileを繰り返し読む計測なのでOS cacheの影響が大きく、異なるstorage、file数、fileサイズ、cold cacheのlibrary全体への速度予測には使えない。実際のlibraryでの読取性能は環境ごとに別途確認する。
 
+2026-09-24には、Windows 10 build 19045、Python 3.13、ローカルNVMe SSDで`--size-mib 1024 --repeats 3`を実行し、1 GiBの一時fileを各3回計測した。
+
+| 方式 | 平均時間 |
+| --- | ---: |
+| 部分fingerprint | 0.004375秒 |
+| 完全fingerprint | 4.252456秒 |
+
+この実測では約972倍だった。部分fingerprintの読取量はfile sizeによらず既定で合計192 KiBのため、大きなfileほど完全fingerprintとの差が広がる。ただし、この結果も生成直後の同じfileを繰り返したwarm cache寄りの値であり、NAS、HDD、cold cache、多数の小さなfileを含むlibraryの処理時間を示すものではない。
+
 再現するにはrepositoryで依存を導入した後、上記コマンドを実行する。`--size-mib`と`--repeats`を変更できる。一時fileは終了時に削除されるが、指定したサイズ分の空き容量が必要。結果を共有するときはOS、Python版、storage、引数、cache条件を併記する。
