@@ -2,6 +2,12 @@
 
 このprojectは[Semantic Versioning](https://semver.org/)に従う。
 
+## 未公開
+
+### 改善
+
+- PyPI版からImmich asset IDの読取専用監査を実行できる`immich-audit` CLIを追加
+
 ## 0.1.1 - 2026-09-23
 
 ### 改善

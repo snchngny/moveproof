@@ -37,6 +37,14 @@ python -m pip install moveproof
 
 Immichの[外部ライブラリ公式説明](https://docs.immich.app/features/libraries/)は、ファイルを移動すると再スキャンで新しいassetとして扱われ、Immich内だけにあるalbum、説明などのmetadataが失われると警告しています。移動・改名前後の対応確認には、[既存ツール比較、移動前後の監査手順、asset ID照合の試作](docs/immich-external-library.md)を参照してください。Moveproofは再スキャン前に旧パスと新パスの候補を示しますが、Immichのmetadata自体は保護・復旧しません。
 
+reconciliation planを作成した後は、インストール済みCLIから検索専用APIだけを使い、旧pathをImmich asset IDへ照合できます。Immichは更新しません。
+
+```bash
+moveproof immich-audit --api-url https://immich.example/api \
+  --library-id YOUR_LIBRARY_ID --immich-root /mnt/photos \
+  --plan plan.json --output asset-audit.json
+```
+
 ```bash
 python examples/media_library_move.py
 ```

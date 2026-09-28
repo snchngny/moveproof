@@ -35,6 +35,14 @@ It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_a
 
 Immich's [external library documentation](https://docs.immich.app/features/libraries/) warns that moving a file makes a rescan treat it as a new asset, which can detach albums, descriptions, and other Immich-only metadata. For a move or rename, use the [tool comparison, before/after audit, and read-only asset ID prototype](https://github.com/snchngny/moveproof/blob/main/docs/immich-external-library.md). Moveproof identifies old-path to new-path candidates before a rescan; it does not preserve or restore Immich metadata by itself.
 
+After creating a reconciliation plan, the installed CLI can join its old paths to Immich asset IDs through search-only API calls. It never updates Immich:
+
+```bash
+moveproof immich-audit --api-url https://immich.example/api \
+  --library-id YOUR_LIBRARY_ID --immich-root /mnt/photos \
+  --plan plan.json --output asset-audit.json
+```
+
 ## Python API
 
 ```python

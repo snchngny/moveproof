@@ -1,6 +1,7 @@
 from .compare import compare_snapshots
 from .fingerprint import FileChangedError, fingerprint_file
 from .guard import LibraryGuardReport, check_library_guard
+from .immich import create_immich_asset_audit, fetch_immich_asset_paths
 from .model import Change, ChangeSet, FileRecord, ScanIssue, Snapshot
 from .reconcile import (
     ReconciliationConflict,
@@ -28,8 +29,10 @@ __all__ = [
     "compare_snapshots",
     "check_library_guard",
     "create_reconciliation_plan",
+    "create_immich_asset_audit",
     "create_snapshot",
     "fingerprint_file",
+    "fetch_immich_asset_paths",
     "load_snapshot",
     "save_snapshot",
 ]
