@@ -31,6 +31,8 @@ moveproof = "moveproof.cli:main"
 
 [project.urls]
 Repository = "https://github.com/snchngny/moveproof"
+Documentation = "https://github.com/snchngny/moveproof#readme"
+Changelog = "https://github.com/snchngny/moveproof/blob/main/CHANGELOG.md"
 Issues = "https://github.com/snchngny/moveproof/issues"
 Funding = "https://github.com/sponsors/snchngny"
 

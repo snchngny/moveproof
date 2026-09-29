@@ -7,6 +7,7 @@
 ### 改善
 
 - PyPI版からImmich asset IDの読取専用監査を実行できる`immich-audit` CLIを追加
+- PyPIからdocumentationと変更履歴へ直接辿れるproject linkを追加
 
 ## 0.1.1 - 2026-09-23
 
