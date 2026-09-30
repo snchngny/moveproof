@@ -38,3 +38,4 @@ jobs:
       - run: python -c "import moveproof; print(moveproof.__all__)"
       - run: moveproof --help
       - run: python examples/media_library_move.py
+      - run: python examples/immich_nas_preflight.py

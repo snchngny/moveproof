@@ -1,12 +1,12 @@
 # Immich外部ライブラリでファイルを移動したときの読取専用監査
 
-Immichの[外部ライブラリの公式説明](https://docs.immich.app/features/libraries/)は、ファイルを移動すると再スキャン時に新しいassetとして扱われ、Immich内だけにあるアルバムや説明などのmetadataが失われると警告している（2026-09-22確認）。[移動検出の要望](https://github.com/immich-app/immich/discussions/16394)でも、同じ内容のファイルが複数ある場合に旧assetを一意に特定できない問題が議論されている。
+Immichの[外部ライブラリの公式説明](https://docs.immich.app/features/libraries/)は、ファイルを移動すると再スキャン時に新しいassetとして扱われ、Immich内だけにあるアルバムや説明などのmetadataが失われると警告している（2026-09-30確認）。[移動検出の要望](https://github.com/immich-app/immich/discussions/16394)でも、同じ内容のファイルが複数ある場合に旧assetを一意に特定できない問題が議論され、NAS間移行時にhashで旧assetと新pathを照合したい利用例が報告されている。[大文字・小文字だけの改名で重複表示が残る報告](https://github.com/immich-app/immich/issues/29995)もあり、再スキャン前の独立したpath照合が必要になる。
 
 Moveproofができるのは、移動前後のファイル内容を照合し、旧パスと新パスの対応候補や曖昧さを読取専用で示すことまで。**Immichのasset IDやmetadataを保持・復旧する機能ではない。** `safe_to_apply: true`もMoveproofのファイル対応が一意という意味であり、Immichへ適用して安全という意味ではない。ImmichのAPIやDBには接続・書込しない。
 
 ## 目的に合う手段を選ぶ
 
-2026-09-23時点の各projectの公開説明を、ファイル移動に関係する範囲だけ比較した。Moveproofは以下の既存ツールを置き換えず、ファイルを変更する前後の証拠作りに限定する。
+2026-09-30時点の各projectの公開説明を、ファイル移動に関係する範囲だけ比較した。Moveproofは以下の既存ツールを置き換えず、ファイルを変更する前後の証拠作りに限定する。
 
 | 目的 | 適した手段 | 主な変更先 |
 | --- | --- | --- |
@@ -18,6 +18,18 @@ Moveproofができるのは、移動前後のファイル内容を照合し、�
 Immichそのものには[外部ライブラリの移動検出要望](https://github.com/immich-app/immich/discussions/16394)があり、同一内容の複数ファイルとmetadataの対応が未解決。assetを外部ライブラリへ移す[公式APIの要望](https://github.com/immich-app/immich/discussions/10092)も未実装で、[DBを直接更新するcommunity手順](https://github.com/immich-app/immich/discussions/20115)にはversion間のschema差分が報告されている。このためMoveproofはImmichへの書込を行わず、読取専用の照合結果までに限定する。公式機能や既存ツールで目的を満たせる場合はそちらを選ぶ。
 
 ## 移動前後を確認する
+
+### 一時directoryだけで試す
+
+repositoryを取得済みなら、NASのroot変更、folder改名、空mountを一度に再現できる。実ファイル、Immich、DBには触れず、一時directoryは終了時に削除する。
+
+```bash
+python examples/immich_nas_preflight.py
+```
+
+出力では、同じファイル集合を保ったNAS root変更に`root_move.verified: true`、一意なfolder改名に`folder_rename.safe_to_apply: true`、空mountに`empty_mount.safe_to_continue: false`と停止理由が表示される。`safe_to_apply`はファイル対応が一意という意味であり、Immichへの変更許可ではない。
+
+### 実際のlibraryで確認する
 
 写真・動画のbackupを別に確保したうえで、移動前に完全fingerprintのsnapshotを作る。JSONは外部ライブラリの外に保存する。以下のパスは自分の環境に置き換える。
 

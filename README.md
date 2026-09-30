@@ -33,7 +33,7 @@ python -m pip install moveproof
 
 インストール後に`moveproof --help`が表示されれば準備完了です。
 
-リポジトリを取得済みなら、[一時フォルダだけを使う移動検出デモ](examples/media_library_move.py)を実行できます。自分のファイルやDBは変更しません。
+リポジトリを取得済みなら、[一時フォルダだけを使う移動検出デモ](examples/media_library_move.py)と[Immich外部ライブラリのNAS移行前確認](examples/immich_nas_preflight.py)を実行できます。自分のファイルやDBは変更しません。
 
 Immichの[外部ライブラリ公式説明](https://docs.immich.app/features/libraries/)は、ファイルを移動すると再スキャンで新しいassetとして扱われ、Immich内だけにあるalbum、説明などのmetadataが失われると警告しています。移動・改名前後の対応確認には、[既存ツール比較、移動前後の監査手順、asset ID照合の試作](docs/immich-external-library.md)を参照してください。Moveproofは再スキャン前に旧パスと新パスの候補を示しますが、Immichのmetadata自体は保護・復旧しません。
 

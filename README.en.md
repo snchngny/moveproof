@@ -35,6 +35,8 @@ It reports the move from `samples/kick.wav` to `archive/kick.wav` and `safe_to_a
 
 Immich's [external library documentation](https://docs.immich.app/features/libraries/) warns that moving a file makes a rescan treat it as a new asset, which can detach albums, descriptions, and other Immich-only metadata. For a move or rename, use the [tool comparison, before/after audit, and read-only asset ID prototype](https://github.com/snchngny/moveproof/blob/main/docs/immich-external-library.md). Moveproof identifies old-path to new-path candidates before a rescan; it does not preserve or restore Immich metadata by itself.
 
+The repository also includes a temporary-directory-only [Immich NAS migration preflight](https://github.com/snchngny/moveproof/blob/main/examples/immich_nas_preflight.py). It reproduces a verified NAS root move, a folder rename, and an empty mount that blocks the next step without touching Immich or your files.
+
 After creating a reconciliation plan, the installed CLI can join its old paths to Immich asset IDs through search-only API calls. It never updates Immich:
 
 ```bash
