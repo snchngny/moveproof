@@ -9,6 +9,7 @@ from typing import Sequence
 from .compare import compare_snapshots
 from .guard import check_library_guard
 from .immich import create_immich_asset_audit, fetch_immich_asset_paths
+from .inventory import create_inventory
 from .reconcile import create_reconciliation_plan
 from .snapshot import create_snapshot, load_snapshot, save_snapshot
 
@@ -29,6 +30,14 @@ def _parser() -> argparse.ArgumentParser:
         metavar="GLOB",
         help="include matching relative paths; repeat for multiple patterns",
     )
+
+    inventory = commands.add_parser(
+        "inventory",
+        help="count file extensions and broad sample-library categories without reading contents",
+    )
+    inventory.add_argument("root", type=Path)
+    inventory.add_argument("--output", "-o", type=Path)
+    inventory.add_argument("--include-hidden", action="store_true")
     snapshot.add_argument(
         "--exclude",
         action="append",
@@ -91,6 +100,15 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "inventory":
+        report = create_inventory(args.root, include_hidden=args.include_hidden)
+        body = json.dumps(report.to_dict(), ensure_ascii=False, indent=2) + "\n"
+        if args.output:
+            args.output.write_text(body, encoding="utf-8")
+        else:
+            print(body, end="")
+        return 1 if report.issues else 0
+
     if args.command == "snapshot":
         result = create_snapshot(
             args.root,

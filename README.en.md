@@ -61,6 +61,14 @@ for change in compare_snapshots(before, after).changes:
 
 ## CLI
 
+Create a read-only inventory of extensions, file counts, byte totals, and broad sample-library categories without reading file contents. It does not move, rename, or rewrite files.
+
+```bash
+moveproof inventory media --output inventory.json
+```
+
+The categories are deliberately coarse and intended for search and planning. Unknown extensions remain under `other`. Exit code 1 means unreadable paths were recorded in `issues`.
+
 ```bash
 moveproof snapshot media --output before.json
 moveproof snapshot media --output after.json

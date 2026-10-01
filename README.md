@@ -68,6 +68,14 @@ for change in changes.changes:
 
 ## CLI
 
+ファイル内容を読まず、拡張子・件数・容量と大分類だけを確認できます。音源本体だけでなく、sampler固有のinstrument、preset、container、補助ファイルが混在するlibraryの初回調査向けです。ファイルの移動・改名・書換は行いません。
+
+```bash
+moveproof inventory media --output inventory.json
+```
+
+分類は検索・計画用の粗い区分です。未対応拡張子は`other`に残し、推測で書換対象にしません。終了code 1は読取できないpathが`issues`に記録されたことを示します。
+
 ```bash
 moveproof snapshot media --output before.json
 moveproof snapshot media --output after.json

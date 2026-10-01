@@ -15,6 +15,7 @@ Moveproofを核に、ローカルmedia libraryを失わずに移行・再編・�
 
 ## Phase 1: 安全な識別・検証
 
+- file内容を読まず拡張子・件数・容量・大分類を把握するread-only inventory
 - version付きfingerprintとsnapshot
 - rename、move、copy、変更、欠損の検出
 - path reconciliation plan
