@@ -2,6 +2,11 @@
 
 このprojectは[Semantic Versioning](https://semver.org/)に従う。
 
+## 未リリース
+
+- 読取専用の拡張子・件数・容量inventoryを追加
+- inventoryのfile属性取得を1回にまとめ、共有folderの走査負担を削減
+
 ## 0.1.2 - 2026-09-28
 
 ### 改善

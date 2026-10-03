@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from moveproof import classify_extension, create_inventory
@@ -10,6 +11,51 @@ from moveproof.cli import main
 
 
 class InventoryTests(unittest.TestCase):
+    def test_file_metadata_is_requested_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sample = root / "sample.wav"
+            sample.write_bytes(b"sample")
+            original = Path.lstat
+            calls = []
+
+            def tracked(path):
+                calls.append(path.name)
+                return original(path)
+
+            with patch.object(Path, "lstat", tracked):
+                report = create_inventory(root)
+            self.assertEqual(calls.count(sample.name), 1)
+            self.assertEqual(report.total_bytes, 6)
+
+    def test_unreadable_file_is_reported(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sample = root / "sample.wav"
+            sample.write_bytes(b"sample")
+            original = Path.lstat
+
+            def denied(path):
+                if path.name == sample.name:
+                    raise PermissionError("test permission denied")
+                return original(path)
+
+            with patch.object(Path, "lstat", denied):
+                report = create_inventory(root)
+            self.assertEqual(report.total_files, 0)
+            self.assertEqual(report.issues[0].error_type, "PermissionError")
+
+    def test_file_symlink_is_excluded(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sample = root / "sample.wav"
+            sample.write_bytes(b"sample")
+            try:
+                (root / "link.wav").symlink_to(sample)
+            except OSError:
+                self.skipTest("symlink creation unavailable")
+            self.assertEqual(create_inventory(root).total_files, 1)
+
     def test_inventory_counts_without_reading_file_contents(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

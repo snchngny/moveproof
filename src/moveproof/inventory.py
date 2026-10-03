@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import stat
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -91,9 +92,10 @@ def create_inventory(root: Path, *, include_hidden: bool = False) -> InventoryRe
         for filename in filenames:
             path = Path(directory, filename)
             try:
-                if path.is_symlink() or not path.is_file():
+                metadata = path.lstat()
+                if not stat.S_ISREG(metadata.st_mode):
                     continue
-                size = path.stat().st_size
+                size = metadata.st_size
             except OSError as error:
                 issues.append(
                     InventoryIssue(
