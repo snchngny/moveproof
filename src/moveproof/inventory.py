@@ -68,9 +68,21 @@ def classify_extension(extension: str) -> str:
     return "other"
 
 
+def _extended_windows_path(path: str) -> str:
+    if path.startswith("\\\\?\\"):
+        return path
+    if path.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + path[2:]
+    return "\\\\?\\" + path
+
+
 def create_inventory(root: Path, *, include_hidden: bool = False) -> InventoryReport:
     resolved_root = root.resolve()
-    if not resolved_root.is_dir():
+    scan_root = (
+        Path(_extended_windows_path(str(resolved_root)))
+        if os.name == "nt" else resolved_root
+    )
+    if not scan_root.is_dir():
         raise NotADirectoryError(str(root))
 
     totals: dict[str, list[int]] = defaultdict(lambda: [0, 0])
@@ -85,7 +97,7 @@ def create_inventory(root: Path, *, include_hidden: bool = False) -> InventoryRe
             )
         )
 
-    for directory, names, filenames in os.walk(resolved_root, onerror=record_walk_error):
+    for directory, names, filenames in os.walk(scan_root, onerror=record_walk_error):
         if not include_hidden:
             names[:] = [name for name in names if not name.startswith(".")]
             filenames = [name for name in filenames if not name.startswith(".")]
@@ -99,7 +111,7 @@ def create_inventory(root: Path, *, include_hidden: bool = False) -> InventoryRe
             except OSError as error:
                 issues.append(
                     InventoryIssue(
-                        path=path.relative_to(resolved_root).as_posix(),
+                        path=path.relative_to(scan_root).as_posix(),
                         error_type=type(error).__name__,
                         message=str(error),
                     )

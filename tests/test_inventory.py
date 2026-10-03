@@ -8,9 +8,19 @@ from pathlib import Path
 
 from moveproof import classify_extension, create_inventory
 from moveproof.cli import main
+from moveproof.inventory import _extended_windows_path
 
 
 class InventoryTests(unittest.TestCase):
+    def test_extended_windows_paths(self) -> None:
+        self.assertEqual(_extended_windows_path(r"C:\samples"), r"\\?\C:\samples")
+        self.assertEqual(
+            _extended_windows_path(r"\\server\share\samples"),
+            r"\\?\UNC\server\share\samples",
+        )
+        extended = r"\\?\UNC\server\share\samples"
+        self.assertEqual(_extended_windows_path(extended), extended)
+
     def test_file_metadata_is_requested_once(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

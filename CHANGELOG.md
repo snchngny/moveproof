@@ -6,6 +6,7 @@
 
 - 読取専用の拡張子・件数・容量inventoryを追加
 - inventoryのfile属性取得を1回にまとめ、共有folderの走査負担を削減
+- Windowsのinventory走査で長いローカル・UNC pathを扱えるように修正
 
 ## 0.1.2 - 2026-09-28
 
