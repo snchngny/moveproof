@@ -61,6 +61,8 @@ for change in compare_snapshots(before, after).changes:
 
 ## CLI
 
+`inventory` is currently available on main. Until it is included in a PyPI release, run `python -m pip install .` from the checkout. Run `python examples/sample_inventory.py` for a temporary-folder demo: three dummy files, 14 bytes, and category totals. It does not parse audio formats or touch your library.
+
 Create a read-only inventory of extensions, file counts, byte totals, and broad sample-library categories without reading file contents. It does not move, rename, or rewrite files.
 
 ```bash
