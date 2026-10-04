@@ -2,17 +2,18 @@
 
 このprojectは[Semantic Versioning](https://semver.org/)に従う。
 
-## 未リリース
+## 0.1.2 - 未リリース
+
+### 追加
 
 - 読取専用の拡張子・件数・容量inventoryを追加
-- inventoryのfile属性取得を1回にまとめ、共有folderの走査負担を削減
-- Windowsのinventory走査で長いローカル・UNC pathを扱えるように修正
-
-## 0.1.2 - 2026-09-28
+- 一時folderのみを使うinventory導入demoを追加
+- Immich asset IDの読取専用監査を実行できる`immich-audit` CLIを追加
 
 ### 改善
 
-- PyPI版からImmich asset IDの読取専用監査を実行できる`immich-audit` CLIを追加
+- inventoryのfile属性取得を1回にまとめ、共有folderの走査負担を削減
+- Windowsのinventory走査で長いローカル・UNC pathを扱えるように修正
 - PyPIからdocumentationと変更履歴へ直接辿れるproject linkを追加
 
 ## 0.1.1 - 2026-09-23

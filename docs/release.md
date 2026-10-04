@@ -16,7 +16,7 @@ PyPI API tokenは保存せず、GitHub ActionsとPyPI Trusted Publishingを使�
 
 ## Releaseごとの手順
 
-1. `CHANGELOG.md`の`未公開`をrelease日へ変更
+1. `CHANGELOG.md`の対象versionの`未リリース`を実際のrelease日へ変更
 2. `pyproject.toml`のversionとrelease tag `vMAJOR.MINOR.PATCH`を一致させる
 3. test、`compileall`、build、`twine check`を実行
 4. 変更を`main`へcommit、push
