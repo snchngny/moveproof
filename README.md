@@ -68,7 +68,7 @@ for change in changes.changes:
 
 ## CLI
 
-`inventory`は現在main版の機能です。PyPI公開版に含まれるまでは、取得済みリポジトリで`python -m pip install .`を実行してください。[一時フォルダの集計デモ](examples/sample_inventory.py)は`python examples/sample_inventory.py`で実行でき、3ファイル・14バイトと大分類を表示します。デモの内容はダミーで、音声形式の解析は行いません。
+`inventory`はPyPIのv0.1.2以降で利用できます。旧版を利用中なら`python -m pip install --upgrade moveproof`で更新してください。[一時フォルダの集計デモ](examples/sample_inventory.py)は取得済みリポジトリで`python examples/sample_inventory.py`を実行でき、3ファイル・14バイトと大分類を表示します。デモの内容はダミーで、音声形式の解析は行いません。
 
 ファイル内容を読まず、拡張子・件数・容量と大分類だけを確認できます。音源本体だけでなく、sampler固有のinstrument、preset、container、補助ファイルが混在するlibraryの初回調査向けです。ファイルの移動・改名・書換は行いません。
 
