@@ -2,7 +2,7 @@
 
 このprojectは[Semantic Versioning](https://semver.org/)に従う。
 
-## 0.1.2 - 未リリース
+## 0.1.2 - 2026-10-04
 
 ### 追加
 
