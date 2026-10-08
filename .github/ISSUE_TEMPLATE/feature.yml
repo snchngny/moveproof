@@ -3,11 +3,16 @@ description: 実際の利用例に基づく改善を提案する
 title: "[Feature] "
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        この報告は公開されます。音源、実際のファイルパス、個人情報、社内資料、秘密値は添付しないでください。
+        匿名化した例と概数だけで構いません。報告は個別開発の受注や納期を保証するものではありません。
   - type: textarea
     id: use_case
     attributes:
       label: 解決したい利用例
-      description: 現在の回避策、file数・size、必要な結果を記載してください。
+      description: 利用中のツールと移行先、困っている操作、現在の回避策、ファイル数・容量の概数、期待する結果を記載してください。
     validations:
       required: true
   - type: textarea
@@ -15,5 +20,12 @@ body:
     attributes:
       label: 最小の提案
       description: API案がある場合は記載してください。
+    validations:
+      required: false
+  - type: textarea
+    id: trial_result
+    attributes:
+      label: 導入・利用例を試した結果（任意）
+      description: 試したコマンドやREADMEの利用例、OS、Moveproofのバージョン、完了できたこと・できなかったことを匿名化して記載してください。未導入ならその理由だけで構いません。
     validations:
       required: false
